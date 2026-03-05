@@ -1,5 +1,12 @@
 'use strict';
 
+// Çift injection'a karşı guard (scripting API ile inject edilirse tekrar çalışmasın)
+if (window.__tp_loaded) {
+  // Zaten yüklü — sadece toggle çağır
+  window.__tp_toggle && window.__tp_toggle();
+} else {
+window.__tp_loaded = true;
+
 // ─── Durum ───────────────────────────────────────────────────────────────────
 let s = {
   speed:     3,
@@ -45,6 +52,7 @@ chrome.runtime.onMessage.addListener((msg) => {
 function toggle() {
   visible ? closeOverlay() : openOverlay();
 }
+window.__tp_toggle = toggle;
 
 // ─── Overlay aç / kapat ───────────────────────────────────────────────────────
 function openOverlay() {
@@ -79,7 +87,9 @@ function buildOverlay() {
   shadow.appendChild(overlay);
 
   // Textarea değerini DOM property olarak set et (HTML escape sorununu önler)
-  q('#tp-txt').value = s.text;
+  const ta = q('#tp-txt');
+  ta.value = s.text;
+  ta.style.fontSize = s.fontSize + 'px';
 
   bindEvents();
 }
@@ -171,6 +181,8 @@ function bindEvents() {
       s.fontSize = +value;
       q('#tp-fsv').textContent = value + 'px';
       overlay.style.fontSize = value + 'px';
+      const ta = q('#tp-txt');
+      if (ta) ta.style.fontSize = value + 'px';
     } else if (id === 'tp-op') {
       s.opacity = value / 100;
       q('#tp-opv').textContent = value + '%';
@@ -462,3 +474,5 @@ const CSS = `
     linear-gradient(135deg,transparent 55%,rgba(255,255,255,.18) 55%,rgba(255,255,255,.18) 70%,transparent 70%);
 }
 `;
+
+} // window.__tp_loaded guard sonu
