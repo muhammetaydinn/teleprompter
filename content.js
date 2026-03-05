@@ -132,7 +132,7 @@ function buildHTML() {
       <input type="range" id="tp-op" min="0" max="100" value="${pct(s.opacity)}">
     </label>
     <label>Hız <span id="tp-spv">${s.speed}x</span>
-      <input type="range" id="tp-sp" min="1" max="10" value="${s.speed}">
+      <input type="range" id="tp-sp" min="0.1" max="20" step="0.1" value="${s.speed}">
     </label>
     <div class="tpo-colors">
       <label>Metin <input type="color" id="tp-tc" value="${s.textColor}"></label>
@@ -151,7 +151,7 @@ function buildHTML() {
   <div class="tpo-ctrl">
     <button class="tpo-cb" id="tp-pp" data-a="pp">▶</button>
     <button class="tpo-cb" data-a="reset" title="Başa dön">↺</button>
-    <input type="range" id="tp-sp2" min="1" max="10" value="${s.speed}" title="Hız">
+    <input type="range" id="tp-sp2" min="0.1" max="20" step="0.1" value="${s.speed}" title="Hız">
     <span id="tp-spv2">${s.speed}x</span>
     <button class="tpo-cb" data-a="edit" title="Düzenle">✎</button>
     <button class="tpo-x" data-a="close">✕</button>
@@ -249,12 +249,12 @@ function bindEvents() {
       togglePlay();
     } else if (e.code === 'ArrowUp') {
       e.preventDefault();
-      s.speed = Math.min(10, s.speed + 1);
+      s.speed = Math.min(20, Math.round((s.speed + 0.1) * 10) / 10);
       syncSpeedUI();
       save();
     } else if (e.code === 'ArrowDown') {
       e.preventDefault();
-      s.speed = Math.max(1, s.speed - 1);
+      s.speed = Math.max(0.1, Math.round((s.speed - 0.1) * 10) / 10);
       syncSpeedUI();
       save();
     }
@@ -417,6 +417,7 @@ const CSS = `
 }
 .tpo-settings input[type=range]{flex:1;accent-color:#38bdf8;cursor:pointer;height:4px}
 .tpo-settings span{min-width:36px;font-size:11px;color:#38bdf8;text-align:right}
+
 
 .tpo-colors{display:flex;gap:16px}
 .tpo-colors label{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.6)}
