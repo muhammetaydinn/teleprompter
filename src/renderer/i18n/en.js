@@ -3,8 +3,6 @@
 window.__APP_I18N__ = {
   en: {
     "meta.title": "Teleprompter Desktop",
-    "header.title": "Teleprompter",
-    "header.subtitle": "Desktop MVP",
 
     "settings.font": "Font",
     "settings.opacity": "Opacity",
@@ -13,16 +11,11 @@ window.__APP_I18N__ = {
     "settings.background": "Background",
     "settings.alwaysOnTop": "Always on top",
 
-    "editor.placeholder": "Type or paste your script here...",
-    "actions.start": "Start",
-    "actions.edit": "Edit",
     "actions.hideEditor": "Hide controls",
     "actions.showEditor": "Show controls",
 
     "read.placeholder": "You can edit the script here as well",
 
-    "controls.speed": "Speed",
-    "controls.onTop": "On top",
     "controls.play": "Play",
     "controls.pause": "Pause",
     "controls.reset": "Reset",
@@ -33,9 +26,5 @@ window.__APP_I18N__ = {
     "aria.font.increase": "Increase font",
     "aria.opacity.decrease": "Decrease opacity",
     "aria.opacity.increase": "Increase opacity",
-
-    "units.px": "px",
-    "units.percent": "%",
-    "units.speed": "x",
   },
 };

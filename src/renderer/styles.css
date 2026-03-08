@@ -37,26 +37,6 @@ body {
   gap: 0;
 }
 
-.app-header {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
-
-.app-header h1 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.app-header p {
-  margin: 0;
-  font-size: 11px;
-  color: rgba(248, 250, 252, 0.65);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
 .panel {
   flex: 1;
   min-height: 0;
@@ -146,18 +126,6 @@ body {
   min-width: 80px;
 }
 
-.settings-grid strong {
-  min-width: 44px;
-  text-align: right;
-  color: #38bdf8;
-  font-size: 12px;
-}
-
-input[type="range"] {
-  flex: 1;
-  accent-color: #38bdf8;
-}
-
 input[type="color"] {
   border: none;
   width: 34px;
@@ -195,32 +163,6 @@ input[type="color"] {
 
 .speed-step-btn:hover {
   background: rgba(255, 255, 255, 0.24);
-}
-
-.actions {
-  padding: 12px;
-  background: rgba(
-    var(--tp-bg-r),
-    var(--tp-bg-g),
-    var(--tp-bg-b),
-    calc(var(--tp-opacity) * 0.4)
-  );
-}
-
-.primary-btn {
-  width: 100%;
-  border: none;
-  border-radius: 0;
-  padding: 12px;
-  cursor: pointer;
-  background: #38bdf8;
-  color: #082f49;
-  font-weight: 700;
-  font-size: 14px;
-}
-
-.primary-btn:hover {
-  background: #0ea5e9;
 }
 
 .read-panel {
@@ -279,60 +221,4 @@ input[type="color"] {
 
 .ctrl-btn:hover {
   background: rgba(255, 255, 255, 0.24);
-}
-
-.speed-inline {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  min-width: 260px;
-}
-
-.speed-inline strong {
-  min-width: 34px;
-  text-align: center;
-  color: #38bdf8;
-}
-
-.toggle-inline {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-}
-
-.setting-inline {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  min-width: 220px;
-}
-
-.setting-inline span,
-.color-inline span {
-  color: rgba(248, 250, 252, 0.8);
-}
-
-.setting-inline span {
-  min-width: 52px;
-}
-
-.setting-inline strong {
-  min-width: 40px;
-  text-align: right;
-  color: #38bdf8;
-}
-
-.setting-inline input[type="range"] {
-  min-width: 110px;
-}
-
-.color-inline {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
 }
