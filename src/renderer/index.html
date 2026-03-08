@@ -8,8 +8,26 @@
   </head>
   <body>
     <div class="app" id="app">
-      <section id="editPanel" class="panel edit-panel">
-        <div class="settings-grid">
+      <section id="readPanel" class="panel read-panel">
+        <div class="read-wrap" id="readWrap">
+          <div class="read-text" id="readText"></div>
+        </div>
+
+        <div class="controls">
+          <button
+            id="playPauseBtn"
+            class="ctrl-btn toggleable-control"
+          ></button>
+          <button
+            id="resetBtn"
+            class="ctrl-btn toggleable-control"
+            data-i18n="controls.reset"
+          ></button>
+
+          <button id="toggleEditorBtn" class="ctrl-btn"></button>
+        </div>
+
+        <div class="settings-grid controls-settings toggleable-control">
           <label>
             <span data-i18n="settings.font"></span>
             <strong id="fontValue"></strong>
@@ -65,109 +83,6 @@
             <span data-i18n="settings.alwaysOnTop"></span>
             <input id="alwaysOnTop" type="checkbox" />
           </label>
-        </div>
-
-        <textarea
-          id="textInput"
-          class="text-input"
-          data-i18n-attr="placeholder:editor.placeholder"
-        ></textarea>
-
-        <div class="actions">
-          <button
-            id="startBtn"
-            class="primary-btn"
-            data-i18n="actions.start"
-          ></button>
-        </div>
-      </section>
-
-      <section id="readPanel" class="panel read-panel hidden">
-        <div class="read-wrap" id="readWrap">
-          <div
-            class="read-text"
-            id="readText"
-            contenteditable="true"
-            spellcheck="false"
-            data-i18n-attr="data-placeholder:read.placeholder"
-          ></div>
-        </div>
-
-        <div class="controls">
-          <button id="playPauseBtn" class="ctrl-btn"></button>
-          <button
-            id="resetBtn"
-            class="ctrl-btn"
-            data-i18n="controls.reset"
-          ></button>
-
-          <label class="speed-inline">
-            <button
-              id="speedReadDown"
-              class="speed-step-btn"
-              type="button"
-              data-i18n-attr="aria-label:aria.speed.decrease"
-            >
-              −
-            </button>
-            <span data-i18n="controls.speed"></span>
-            <input
-              id="speedRead"
-              type="range"
-              min="0.1"
-              max="20"
-              step="0.1"
-              value="3"
-            />
-            <button
-              id="speedReadUp"
-              class="speed-step-btn"
-              type="button"
-              data-i18n-attr="aria-label:aria.speed.increase"
-            >
-              +
-            </button>
-            <strong id="speedReadValue"></strong>
-          </label>
-
-          <label class="setting-inline">
-            <span data-i18n="settings.font"></span>
-            <input
-              id="fontSizeRead"
-              type="range"
-              min="16"
-              max="120"
-              value="40"
-            />
-            <strong id="fontReadValue"></strong>
-          </label>
-
-          <label class="setting-inline">
-            <span data-i18n="settings.opacity"></span>
-            <input id="opacityRead" type="range" min="0" max="100" value="85" />
-            <strong id="opacityReadValue"></strong>
-          </label>
-
-          <label class="color-inline">
-            <span data-i18n="settings.textColor"></span>
-            <input id="textColorRead" type="color" value="#ffffff" />
-          </label>
-
-          <label class="color-inline">
-            <span data-i18n="settings.background"></span>
-            <input id="bgColorRead" type="color" value="#000000" />
-          </label>
-
-          <label class="toggle-inline">
-            <span data-i18n="controls.onTop"></span>
-            <input id="alwaysOnTopRead" type="checkbox" />
-          </label>
-
-          <button
-            id="editBtn"
-            class="ctrl-btn"
-            data-i18n="actions.edit"
-          ></button>
         </div>
       </section>
     </div>

@@ -16,6 +16,8 @@ window.__APP_I18N__ = {
     "editor.placeholder": "Type or paste your script here...",
     "actions.start": "Start",
     "actions.edit": "Edit",
+    "actions.hideEditor": "Hide controls",
+    "actions.showEditor": "Show controls",
 
     "read.placeholder": "You can edit the script here as well",
 

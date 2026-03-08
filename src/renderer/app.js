@@ -13,6 +13,7 @@ const DEFAULT_STATE = {
   bgColor: "#000000",
   text: "",
   alwaysOnTop: false,
+  controlsVisible: true,
 };
 
 const state = {
@@ -22,40 +23,27 @@ const state = {
 
 const elements = {
   app: document.getElementById("app"),
-  editPanel: document.getElementById("editPanel"),
-  readPanel: document.getElementById("readPanel"),
   fontSize: document.getElementById("fontSize"),
-  fontSizeRead: document.getElementById("fontSizeRead"),
   fontValue: document.getElementById("fontValue"),
-  fontReadValue: document.getElementById("fontReadValue"),
   opacity: document.getElementById("opacity"),
-  opacityRead: document.getElementById("opacityRead"),
   opacityValue: document.getElementById("opacityValue"),
-  opacityReadValue: document.getElementById("opacityReadValue"),
   speed: document.getElementById("speed"),
   speedDown: document.getElementById("speedDown"),
   speedUp: document.getElementById("speedUp"),
   speedValue: document.getElementById("speedValue"),
   textColor: document.getElementById("textColor"),
-  textColorRead: document.getElementById("textColorRead"),
   bgColor: document.getElementById("bgColor"),
-  bgColorRead: document.getElementById("bgColorRead"),
-  textInput: document.getElementById("textInput"),
   alwaysOnTop: document.getElementById("alwaysOnTop"),
-  startBtn: document.getElementById("startBtn"),
   readWrap: document.getElementById("readWrap"),
   readText: document.getElementById("readText"),
   playPauseBtn: document.getElementById("playPauseBtn"),
   resetBtn: document.getElementById("resetBtn"),
-  speedRead: document.getElementById("speedRead"),
-  speedReadDown: document.getElementById("speedReadDown"),
-  speedReadUp: document.getElementById("speedReadUp"),
-  speedReadValue: document.getElementById("speedReadValue"),
-  alwaysOnTopRead: document.getElementById("alwaysOnTopRead"),
-  editBtn: document.getElementById("editBtn"),
+  toggleEditorBtn: document.getElementById("toggleEditorBtn"),
+  toggleableControls: Array.from(
+    document.querySelectorAll(".toggleable-control"),
+  ),
 };
 
-let mode = "edit";
 let playing = false;
 let scrollPos = 0;
 let containerHeight = 0;
@@ -66,6 +54,8 @@ init().catch(() => {
   applyI18n();
   applyStateToUi();
   applyVisualState();
+  syncEditorVisibility();
+  updatePlayPauseLabel();
 });
 
 async function init() {
@@ -73,6 +63,8 @@ async function init() {
   bindEvents();
   applyStateToUi();
   applyVisualState();
+  syncReadText();
+  syncEditorVisibility();
 
   if (window.windowControls?.setAlwaysOnTop) {
     try {
@@ -84,6 +76,10 @@ async function init() {
       saveState();
     } catch {}
   }
+
+  requestAnimationFrame(() => {
+    refreshReadViewport();
+  });
 }
 
 function applyI18n() {
@@ -116,23 +112,11 @@ function bindEvents() {
     setFontSize(Number(event.target.value));
   });
 
-  elements.fontSizeRead.addEventListener("input", (event) => {
-    setFontSize(Number(event.target.value));
-  });
-
   elements.opacity.addEventListener("input", (event) => {
     setOpacity(Number(event.target.value));
   });
 
-  elements.opacityRead.addEventListener("input", (event) => {
-    setOpacity(Number(event.target.value));
-  });
-
   elements.speed.addEventListener("input", (event) => {
-    updateSpeed(Number(event.target.value));
-  });
-
-  elements.speedRead.addEventListener("input", (event) => {
     updateSpeed(Number(event.target.value));
   });
 
@@ -144,19 +128,7 @@ function bindEvents() {
     stepSpeed(SPEED_STEP);
   });
 
-  elements.speedReadDown.addEventListener("click", () => {
-    stepSpeed(-SPEED_STEP);
-  });
-
-  elements.speedReadUp.addEventListener("click", () => {
-    stepSpeed(SPEED_STEP);
-  });
-
   elements.textColor.addEventListener("input", (event) => {
-    setTextColor(event.target.value);
-  });
-
-  elements.textColorRead.addEventListener("input", (event) => {
     setTextColor(event.target.value);
   });
 
@@ -164,97 +136,49 @@ function bindEvents() {
     setBackgroundColor(event.target.value);
   });
 
-  elements.bgColorRead.addEventListener("input", (event) => {
-    setBackgroundColor(event.target.value);
-  });
-
-  elements.textInput.addEventListener("input", (event) => {
-    state.text = event.target.value;
-    saveState();
-  });
-
-  elements.readText.addEventListener("input", () => {
-    const nextText = getReadTextValue();
-    state.text = nextText;
-    elements.textInput.value = nextText;
-    saveState();
-  });
-
-  elements.readText.addEventListener("focus", () => {
-    if (mode !== "read" || !playing) return;
-    playing = false;
-    stopAnimation();
-    updatePlayPauseLabel();
-  });
-
   elements.alwaysOnTop.addEventListener("change", (event) => {
     void updateAlwaysOnTop(event.target.checked);
   });
 
-  elements.alwaysOnTopRead.addEventListener("change", (event) => {
-    void updateAlwaysOnTop(event.target.checked);
-  });
-
-  elements.startBtn.addEventListener("click", startReadMode);
   elements.playPauseBtn.addEventListener("click", togglePlayPause);
   elements.resetBtn.addEventListener("click", resetRead);
-  elements.editBtn.addEventListener("click", goToEditMode);
+  elements.toggleEditorBtn.addEventListener("click", () => {
+    toggleEditor();
+  });
 
   window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("resize", onResize);
   window.addEventListener("beforeunload", stopAnimation);
 }
 
 function applyStateToUi() {
   elements.fontSize.value = String(state.fontSize);
-  elements.fontSizeRead.value = String(state.fontSize);
   elements.opacity.value = String(state.opacity);
-  elements.opacityRead.value = String(state.opacity);
   elements.speed.value = String(state.speed);
-  elements.speedRead.value = String(state.speed);
   elements.textColor.value = state.textColor;
-  elements.textColorRead.value = state.textColor;
   elements.bgColor.value = state.bgColor;
-  elements.bgColorRead.value = state.bgColor;
-  elements.textInput.value = state.text;
 
   elements.fontValue.textContent = `${state.fontSize}${t("units.px")}`;
-  elements.fontReadValue.textContent = `${state.fontSize}${t("units.px")}`;
   elements.opacityValue.textContent = `${state.opacity}${t("units.percent")}`;
-  elements.opacityReadValue.textContent = `${state.opacity}${t("units.percent")}`;
   elements.speedValue.textContent = `${state.speed}${t("units.speed")}`;
-  elements.speedReadValue.textContent = `${state.speed}${t("units.speed")}`;
 
-  updatePlayPauseLabel();
   syncAlwaysOnTopInputs();
+  updatePlayPauseLabel();
+  updateToggleEditorLabel();
 }
 
 function setFontSize(nextFontSize) {
   state.fontSize = normalizeFontSize(nextFontSize);
-  const displayValue = `${state.fontSize}${t("units.px")}`;
-
   elements.fontSize.value = String(state.fontSize);
-  elements.fontSizeRead.value = String(state.fontSize);
-  elements.fontValue.textContent = displayValue;
-  elements.fontReadValue.textContent = displayValue;
-
+  elements.fontValue.textContent = `${state.fontSize}${t("units.px")}`;
   applyVisualState();
-
-  if (mode === "read") {
-    containerHeight = elements.readWrap.clientHeight;
-  }
-
   saveState();
 }
 
 function setOpacity(nextOpacity) {
   state.opacity = normalizeOpacity(nextOpacity);
-  const displayValue = `${state.opacity}${t("units.percent")}`;
-
   elements.opacity.value = String(state.opacity);
-  elements.opacityRead.value = String(state.opacity);
-  elements.opacityValue.textContent = displayValue;
-  elements.opacityReadValue.textContent = displayValue;
-
+  elements.opacityValue.textContent = `${state.opacity}${t("units.percent")}`;
   applyVisualState();
   saveState();
 }
@@ -264,8 +188,6 @@ function setTextColor(nextTextColor) {
 
   state.textColor = nextTextColor;
   elements.textColor.value = state.textColor;
-  elements.textColorRead.value = state.textColor;
-
   applyVisualState();
   saveState();
 }
@@ -275,8 +197,6 @@ function setBackgroundColor(nextBackgroundColor) {
 
   state.bgColor = nextBackgroundColor;
   elements.bgColor.value = state.bgColor;
-  elements.bgColorRead.value = state.bgColor;
-
   applyVisualState();
   saveState();
 }
@@ -292,38 +212,8 @@ function applyVisualState() {
   elements.app.style.setProperty("--tp-opacity", String(state.opacity / 100));
 }
 
-function startReadMode() {
-  state.text = elements.textInput.value;
-  saveState();
-
-  mode = "read";
-  scrollPos = 0;
-
-  elements.editPanel.classList.add("hidden");
-  elements.readPanel.classList.remove("hidden");
-
-  elements.readText.textContent = state.text;
-
-  requestAnimationFrame(() => {
-    containerHeight = elements.readWrap.clientHeight;
-    setReadOffset(containerHeight);
-    playing = true;
-    updatePlayPauseLabel();
-    startAnimation();
-  });
-}
-
-function goToEditMode() {
-  if (mode === "read") {
-    state.text = getReadTextValue();
-    saveState();
-  }
-
-  stopAnimation();
-  mode = "edit";
-  elements.readPanel.classList.add("hidden");
-  elements.editPanel.classList.remove("hidden");
-  elements.textInput.value = state.text;
+function syncReadText() {
+  elements.readText.textContent = state.text || " ";
 }
 
 function togglePlayPause() {
@@ -339,9 +229,9 @@ function togglePlayPause() {
 
 function resetRead() {
   stopAnimation();
-  scrollPos = 0;
-  setReadOffset(containerHeight);
   playing = false;
+  scrollPos = 0;
+  refreshReadViewport();
   updatePlayPauseLabel();
 }
 
@@ -350,6 +240,7 @@ function startAnimation() {
     cancelAnimationFrame(animFrame);
   }
 
+  refreshReadViewport();
   lastTs = null;
 
   const tick = (timestamp) => {
@@ -391,6 +282,11 @@ function setReadOffset(offset) {
   elements.readText.style.transform = `translateY(${offset}px)`;
 }
 
+function refreshReadViewport() {
+  containerHeight = elements.readWrap.clientHeight;
+  setReadOffset(containerHeight - scrollPos);
+}
+
 function updatePlayPauseLabel() {
   elements.playPauseBtn.textContent = playing
     ? t("controls.pause")
@@ -400,9 +296,7 @@ function updatePlayPauseLabel() {
 function updateSpeed(nextSpeed) {
   state.speed = normalizeSpeed(nextSpeed);
   elements.speed.value = String(state.speed);
-  elements.speedRead.value = String(state.speed);
   elements.speedValue.textContent = `${state.speed}${t("units.speed")}`;
-  elements.speedReadValue.textContent = `${state.speed}${t("units.speed")}`;
   saveState();
 }
 
@@ -410,23 +304,67 @@ function stepSpeed(delta) {
   updateSpeed(state.speed + delta);
 }
 
+function toggleEditor(forceVisible) {
+  const nextVisible =
+    typeof forceVisible === "boolean" ? forceVisible : !state.controlsVisible;
+
+  state.controlsVisible = nextVisible;
+  syncEditorVisibility();
+  saveState();
+}
+
+function syncEditorVisibility() {
+  elements.toggleableControls.forEach((node) => {
+    node.classList.toggle("hidden", !state.controlsVisible);
+  });
+
+  updateToggleEditorLabel();
+
+  requestAnimationFrame(() => {
+    refreshReadViewport();
+  });
+}
+
+function updateToggleEditorLabel() {
+  elements.toggleEditorBtn.textContent = state.controlsVisible
+    ? t("actions.hideEditor")
+    : t("actions.showEditor");
+}
+
 function normalizeSpeed(value) {
+  if (!Number.isFinite(value)) {
+    return DEFAULT_STATE.speed;
+  }
+
   const clamped = Math.min(20, Math.max(0.1, value));
   return Math.round(clamped * 10) / 10;
 }
 
 function normalizeFontSize(value) {
+  if (!Number.isFinite(value)) {
+    return DEFAULT_STATE.fontSize;
+  }
+
   const clamped = Math.min(120, Math.max(16, value));
   return Math.round(clamped);
 }
 
 function normalizeOpacity(value) {
+  if (!Number.isFinite(value)) {
+    return DEFAULT_STATE.opacity;
+  }
+
   const clamped = Math.min(100, Math.max(0, value));
   return Math.round(clamped);
 }
 
 function onKeyDown(event) {
-  if (mode !== "read") {
+  const target = event.target;
+  const isFormControl =
+    target instanceof HTMLElement &&
+    (target.tagName === "TEXTAREA" || target.tagName === "INPUT");
+
+  if (isFormControl) {
     return;
   }
 
@@ -450,8 +388,12 @@ function onKeyDown(event) {
 
   if (event.code === "Escape") {
     event.preventDefault();
-    goToEditMode();
+    toggleEditor();
   }
+}
+
+function onResize() {
+  refreshReadViewport();
 }
 
 async function updateAlwaysOnTop(nextValue) {
@@ -472,7 +414,6 @@ async function updateAlwaysOnTop(nextValue) {
 
 function syncAlwaysOnTopInputs() {
   elements.alwaysOnTop.checked = state.alwaysOnTop;
-  elements.alwaysOnTopRead.checked = state.alwaysOnTop;
 }
 
 function loadState() {
@@ -487,13 +428,11 @@ function loadState() {
 
     return {
       speed: normalizeSpeed(Number(parsed.speed ?? DEFAULT_STATE.speed)),
-      fontSize: Math.min(
-        120,
-        Math.max(16, Number(parsed.fontSize ?? DEFAULT_STATE.fontSize)),
+      fontSize: normalizeFontSize(
+        Number(parsed.fontSize ?? DEFAULT_STATE.fontSize),
       ),
-      opacity: Math.min(
-        100,
-        Math.max(0, Number(parsed.opacity ?? DEFAULT_STATE.opacity)),
+      opacity: normalizeOpacity(
+        Number(parsed.opacity ?? DEFAULT_STATE.opacity),
       ),
       textColor: isHexColor(parsed.textColor)
         ? parsed.textColor
@@ -503,6 +442,10 @@ function loadState() {
         : DEFAULT_STATE.bgColor,
       text: typeof parsed.text === "string" ? parsed.text : DEFAULT_STATE.text,
       alwaysOnTop: Boolean(parsed.alwaysOnTop),
+      controlsVisible:
+        typeof parsed.controlsVisible === "boolean"
+          ? parsed.controlsVisible
+          : DEFAULT_STATE.controlsVisible,
     };
   } catch {
     return {};
@@ -510,7 +453,9 @@ function loadState() {
 }
 
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {}
 }
 
 function hexToRgb(hex) {
@@ -530,11 +475,4 @@ function isHexColor(value) {
 
 function t(key) {
   return I18N[key] ?? key;
-}
-
-function getReadTextValue() {
-  return (elements.readText.innerText || "")
-    .replace(/\u00a0/g, " ")
-    .replace(/\r/g, "")
-    .replace(/\n$/, "");
 }

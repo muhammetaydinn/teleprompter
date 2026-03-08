@@ -78,10 +78,6 @@ body {
   display: none;
 }
 
-.edit-panel {
-  gap: 0;
-}
-
 .settings-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -92,6 +88,16 @@ body {
     var(--tp-bg-g),
     var(--tp-bg-b),
     calc(var(--tp-opacity) * 0.5)
+  );
+}
+
+.controls-settings {
+  border-top: 1px solid rgba(248, 250, 252, 0.12);
+  background: rgba(
+    var(--tp-bg-r),
+    var(--tp-bg-g),
+    var(--tp-bg-b),
+    calc(var(--tp-opacity) * 0.55)
   );
 }
 
@@ -155,29 +161,6 @@ input[type="color"] {
 
 .speed-step-btn:hover {
   background: rgba(255, 255, 255, 0.24);
-}
-
-.text-input {
-  flex: 1;
-  min-height: 0;
-  resize: none;
-  border: none;
-  outline: none;
-  padding: 18px;
-  color: inherit;
-  background: rgba(
-    var(--tp-bg-r),
-    var(--tp-bg-g),
-    var(--tp-bg-b),
-    calc(var(--tp-opacity) * 0.3)
-  );
-  font-family: inherit;
-  font-size: var(--tp-font-size);
-  line-height: 1.7;
-}
-
-.text-input::placeholder {
-  color: rgba(248, 250, 252, 0.4);
 }
 
 .actions {
