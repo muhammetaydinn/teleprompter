@@ -17,6 +17,7 @@ function createMainWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false,
+      spellcheck: false,
     },
   });
 
@@ -32,6 +33,20 @@ ipcMain.handle("window:set-always-on-top", (_event, enabled) => {
 ipcMain.handle("window:get-always-on-top", () => {
   if (!mainWindow || mainWindow.isDestroyed()) return false;
   return mainWindow.isAlwaysOnTop();
+});
+
+ipcMain.handle("window:adjust-height", (_event, deltaHeight) => {
+  if (!mainWindow || mainWindow.isDestroyed()) return null;
+
+  const numericDelta = Number(deltaHeight);
+  if (!Number.isFinite(numericDelta)) {
+    return mainWindow.getSize()[1];
+  }
+
+  const [currentWidth, currentHeight] = mainWindow.getSize();
+  const nextHeight = Math.max(200, currentHeight + Math.round(numericDelta));
+  mainWindow.setSize(currentWidth, nextHeight);
+  return nextHeight;
 });
 
 app.whenReady().then(() => {

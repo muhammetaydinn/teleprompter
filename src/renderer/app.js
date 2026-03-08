@@ -312,7 +312,9 @@ function syncReadEditability() {
     "contenteditable",
     editable ? "true" : "false",
   );
-  elements.readText.setAttribute("spellcheck", editable ? "true" : "false");
+  elements.readText.setAttribute("spellcheck", "false");
+  elements.readText.setAttribute("autocorrect", "off");
+  elements.readText.setAttribute("autocapitalize", "off");
 
   if (!editable && document.activeElement === elements.readText) {
     elements.readText.blur();
@@ -331,15 +333,16 @@ function stepSpeed(delta) {
 }
 
 function toggleEditor(forceVisible) {
+  const targetReadHeight = elements.readWrap.clientHeight;
   const nextVisible =
     typeof forceVisible === "boolean" ? forceVisible : !state.controlsVisible;
 
   state.controlsVisible = nextVisible;
-  syncEditorVisibility();
+  syncEditorVisibility(targetReadHeight);
   saveState();
 }
 
-function syncEditorVisibility() {
+function syncEditorVisibility(targetReadHeight) {
   elements.toggleableControls.forEach((node) => {
     node.classList.toggle("hidden", !state.controlsVisible);
   });
@@ -347,8 +350,30 @@ function syncEditorVisibility() {
   updateToggleEditorLabel();
 
   requestAnimationFrame(() => {
+    if (typeof targetReadHeight === "number") {
+      const readHeightDelta = elements.readWrap.clientHeight - targetReadHeight;
+      if (Math.abs(readHeightDelta) >= 1) {
+        void adjustWindowHeightByReadDelta(readHeightDelta);
+      }
+    }
+
     refreshReadViewport();
   });
+}
+
+async function adjustWindowHeightByReadDelta(readHeightDelta) {
+  if (!window.windowControls?.adjustHeight) {
+    return;
+  }
+
+  const windowHeightDelta = -Math.round(readHeightDelta);
+  if (windowHeightDelta === 0) {
+    return;
+  }
+
+  try {
+    await window.windowControls.adjustHeight(windowHeightDelta);
+  } catch {}
 }
 
 function updateToggleEditorLabel() {
