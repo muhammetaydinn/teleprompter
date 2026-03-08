@@ -27,13 +27,13 @@ const elements = {
   app: document.getElementById("app"),
   fontDown: document.getElementById("fontDown"),
   fontUp: document.getElementById("fontUp"),
-  fontValue: document.getElementById("fontValue"),
+  fontValueInput: document.getElementById("fontValueInput"),
   opacityDown: document.getElementById("opacityDown"),
   opacityUp: document.getElementById("opacityUp"),
-  opacityValue: document.getElementById("opacityValue"),
+  opacityValueInput: document.getElementById("opacityValueInput"),
   speedDown: document.getElementById("speedDown"),
   speedUp: document.getElementById("speedUp"),
-  speedValue: document.getElementById("speedValue"),
+  speedValueInput: document.getElementById("speedValueInput"),
   textColor: document.getElementById("textColor"),
   bgColor: document.getElementById("bgColor"),
   alwaysOnTop: document.getElementById("alwaysOnTop"),
@@ -129,6 +129,24 @@ function bindEvents() {
     stepOpacity(OPACITY_STEP);
   });
 
+  bindStepInput(
+    elements.fontValueInput,
+    (nextValue) => setFontSize(nextValue),
+    () => state.fontSize,
+  );
+
+  bindStepInput(
+    elements.opacityValueInput,
+    (nextValue) => setOpacity(nextValue),
+    () => state.opacity,
+  );
+
+  bindStepInput(
+    elements.speedValueInput,
+    (nextValue) => updateSpeed(nextValue),
+    () => state.speed,
+  );
+
   elements.speedDown.addEventListener("click", () => {
     stepSpeed(-SPEED_STEP);
   });
@@ -177,9 +195,9 @@ function applyStateToUi() {
   elements.textColor.value = state.textColor;
   elements.bgColor.value = state.bgColor;
 
-  elements.fontValue.textContent = `${state.fontSize}${t("units.px")}`;
-  elements.opacityValue.textContent = `${state.opacity}${t("units.percent")}`;
-  elements.speedValue.textContent = `${state.speed}${t("units.speed")}`;
+  elements.fontValueInput.value = String(state.fontSize);
+  elements.opacityValueInput.value = String(state.opacity);
+  elements.speedValueInput.value = String(state.speed);
 
   syncAlwaysOnTopInputs();
   updatePlayPauseLabel();
@@ -188,7 +206,7 @@ function applyStateToUi() {
 
 function setFontSize(nextFontSize) {
   state.fontSize = normalizeFontSize(nextFontSize);
-  elements.fontValue.textContent = `${state.fontSize}${t("units.px")}`;
+  elements.fontValueInput.value = String(state.fontSize);
   applyVisualState();
   saveState();
 }
@@ -199,7 +217,7 @@ function stepFontSize(delta) {
 
 function setOpacity(nextOpacity) {
   state.opacity = normalizeOpacity(nextOpacity);
-  elements.opacityValue.textContent = `${state.opacity}${t("units.percent")}`;
+  elements.opacityValueInput.value = String(state.opacity);
   applyVisualState();
   saveState();
 }
@@ -359,8 +377,31 @@ function syncReadEditability() {
 
 function updateSpeed(nextSpeed) {
   state.speed = normalizeSpeed(nextSpeed);
-  elements.speedValue.textContent = `${state.speed}${t("units.speed")}`;
+  elements.speedValueInput.value = String(state.speed);
   saveState();
+}
+
+function bindStepInput(inputElement, applyValue, getCurrentValue) {
+  const commit = () => {
+    const parsed = Number(inputElement.value);
+    if (Number.isFinite(parsed)) {
+      applyValue(parsed);
+    } else {
+      inputElement.value = String(getCurrentValue());
+    }
+  };
+
+  inputElement.addEventListener("change", commit);
+  inputElement.addEventListener("blur", commit);
+  inputElement.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") {
+      return;
+    }
+
+    event.preventDefault();
+    commit();
+    inputElement.blur();
+  });
 }
 
 function stepSpeed(delta) {

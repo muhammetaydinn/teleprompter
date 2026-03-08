@@ -113,9 +113,32 @@ body {
   gap: 6px;
 }
 
-.step-value {
-  min-width: 52px;
-  text-align: center !important;
+.step-input {
+  width: 56px;
+  min-width: 56px;
+  height: 24px;
+  border: none;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.15);
+  color: #38bdf8;
+  text-align: center;
+  font-size: 12px;
+  padding: 0 4px;
+}
+
+.step-input:focus {
+  outline: 1px solid rgba(56, 189, 248, 0.7);
+}
+
+.step-input::-webkit-outer-spin-button,
+.step-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.step-input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
 }
 
 .settings-grid span {
