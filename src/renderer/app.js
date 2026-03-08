@@ -147,6 +147,10 @@ function bindEvents() {
     });
   });
 
+  elements.readWrap.addEventListener("wheel", onReadWrapWheel, {
+    passive: false,
+  });
+
   elements.alwaysOnTop.addEventListener("change", (event) => {
     void updateAlwaysOnTop(event.target.checked);
   });
@@ -298,6 +302,28 @@ function setReadOffset(offset) {
 function refreshReadViewport() {
   containerHeight = elements.readWrap.clientHeight;
   setReadOffset(containerHeight - scrollPos);
+}
+
+function onReadWrapWheel(event) {
+  if (playing) {
+    return;
+  }
+
+  if (containerHeight <= 0) {
+    refreshReadViewport();
+  }
+
+  event.preventDefault();
+  scrollPos = clampScrollPos(scrollPos + event.deltaY);
+  setReadOffset(containerHeight - scrollPos);
+}
+
+function clampScrollPos(nextValue) {
+  const maxScrollPos = Math.max(
+    0,
+    containerHeight + elements.readText.offsetHeight + 40,
+  );
+  return Math.min(maxScrollPos, Math.max(0, nextValue));
 }
 
 function updatePlayPauseLabel() {
