@@ -6,6 +6,8 @@ const STORAGE_KEY = "teleprompter-mvp-state-v1";
 const SPEED_STEP = 0.1;
 const FONT_STEP = 1;
 const OPACITY_STEP = 1;
+const HOLD_START_DELAY_MS = 280;
+const HOLD_REPEAT_INTERVAL_MS = 60;
 
 const DEFAULT_STATE = {
   speed: 3,
@@ -113,19 +115,19 @@ function applyI18n() {
 }
 
 function bindEvents() {
-  elements.fontDown.addEventListener("click", () => {
+  bindStepButtonHold(elements.fontDown, () => {
     stepFontSize(-FONT_STEP);
   });
 
-  elements.fontUp.addEventListener("click", () => {
+  bindStepButtonHold(elements.fontUp, () => {
     stepFontSize(FONT_STEP);
   });
 
-  elements.opacityDown.addEventListener("click", () => {
+  bindStepButtonHold(elements.opacityDown, () => {
     stepOpacity(-OPACITY_STEP);
   });
 
-  elements.opacityUp.addEventListener("click", () => {
+  bindStepButtonHold(elements.opacityUp, () => {
     stepOpacity(OPACITY_STEP);
   });
 
@@ -147,11 +149,11 @@ function bindEvents() {
     () => state.speed,
   );
 
-  elements.speedDown.addEventListener("click", () => {
+  bindStepButtonHold(elements.speedDown, () => {
     stepSpeed(-SPEED_STEP);
   });
 
-  elements.speedUp.addEventListener("click", () => {
+  bindStepButtonHold(elements.speedUp, () => {
     stepSpeed(SPEED_STEP);
   });
 
@@ -401,6 +403,65 @@ function bindStepInput(inputElement, applyValue, getCurrentValue) {
     event.preventDefault();
     commit();
     inputElement.blur();
+  });
+}
+
+function bindStepButtonHold(buttonElement, applyStep) {
+  let holdTimeoutId = null;
+  let holdIntervalId = null;
+  let didRepeat = false;
+
+  const clearHold = () => {
+    if (holdTimeoutId !== null) {
+      window.clearTimeout(holdTimeoutId);
+      holdTimeoutId = null;
+    }
+
+    if (holdIntervalId !== null) {
+      window.clearInterval(holdIntervalId);
+      holdIntervalId = null;
+    }
+  };
+
+  const startHold = () => {
+    clearHold();
+    didRepeat = false;
+
+    holdTimeoutId = window.setTimeout(() => {
+      didRepeat = true;
+      applyStep();
+
+      holdIntervalId = window.setInterval(() => {
+        applyStep();
+      }, HOLD_REPEAT_INTERVAL_MS);
+    }, HOLD_START_DELAY_MS);
+  };
+
+  buttonElement.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "mouse" && event.button !== 0) {
+      return;
+    }
+
+    startHold();
+  });
+
+  buttonElement.addEventListener("pointerup", clearHold);
+  buttonElement.addEventListener("pointercancel", clearHold);
+  buttonElement.addEventListener("pointerleave", clearHold);
+
+  buttonElement.addEventListener("click", (event) => {
+    if (didRepeat) {
+      event.preventDefault();
+      didRepeat = false;
+      return;
+    }
+
+    applyStep();
+  });
+
+  window.addEventListener("blur", () => {
+    clearHold();
+    didRepeat = false;
   });
 }
 
