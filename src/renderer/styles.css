@@ -139,8 +139,13 @@ input[type="color"] {
 }
 
 .toggle-row {
-  justify-content: space-between;
-  padding-right: 4px;
+  justify-content: flex-start;
+  gap: 6px;
+  padding-right: 0;
+}
+
+.toggle-row span {
+  min-width: auto;
 }
 
 .speed-step-btn {
