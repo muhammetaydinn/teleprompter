@@ -308,7 +308,10 @@ function updatePlayPauseLabel() {
 
 function syncReadEditability() {
   const editable = !playing;
-  elements.readText.setAttribute("contenteditable", editable ? "true" : "false");
+  elements.readText.setAttribute(
+    "contenteditable",
+    editable ? "true" : "false",
+  );
   elements.readText.setAttribute("spellcheck", editable ? "true" : "false");
 
   if (!editable && document.activeElement === elements.readText) {
