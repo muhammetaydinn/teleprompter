@@ -1,226 +1,136 @@
-# Teleprompter Browser Extension - Ürün Gereksinimleri Dokümanı (PRD)
+# Teleprompter Desktop App — MVP PRD
 
-**Tarih:** 2026-03-05
-**Versiyon:** 1.1
-**Durum:** Taslak
-
----
-
-## 1. Genel Bakış
-
-### 1.1 Ürün Tanımı
-
-Tarayıcı eklentisi olarak çalışan bir teleprompter aracı. Kullanıcı herhangi bir web sitesindeyken eklenti ikonuna tıklar ve sayfa üzerinde şeffaf bir overlay açılır. Bu overlay içinde metin okunur ve play butonuna basılınca metin otomatik kaymaya başlar.
-
-### 1.2 Platform
-
-- **Browser Extension** (Chrome / Firefox / Edge)
-- İşletim sistemi bağımsız — macOS, Windows, Linux hepsinde çalışır
-- Ek kurulum gerektirmez (tarayıcıya eklenti olarak yüklenir)
-
-### 1.3 Çalışma Mantığı
-
-```
-Kullanıcı herhangi bir siteye gider
-    │
-    ▼
-Eklenti ikonuna tıklar → Overlay açılır (toggle)
-    │
-    ▼
-Overlay içinde metin girer, ayarlar yapar, konumlandırır
-    │
-    ▼
-PLAY → Metin aşağıdan yukarıya kayar (klasik studio)
-    │
-    ▼
-Eklenti ikonuna tekrar tıklar → Overlay kapanır
-```
-
-### 1.4 Hedef Kullanıcılar
-
-- İçerik üreticileri (ekran kaydı sırasında metin okumak için)
-- Online sunum yapanlar (Zoom, Meet vb. açıkken overlay olarak kullanmak)
-- Podcastçiler ve video blog yapımcıları
+**Tarih:** 2026-03-09  
+**Versiyon:** 0.1 (MVP)  
+**Durum:** Onaya hazır
 
 ---
 
-## 2. Temel Özellikler
+## 1. Ürün Özeti
 
-### 2.1 Overlay Penceresi
+Tarayıcıdan bağımsız çalışan, masaüstü üzerinde kullanılabilen bir teleprompter uygulaması geliştirilecektir.  
+Kullanıcı metni uygulama içinde düzenler, okuma moduna geçer ve metin aşağıdan yukarıya otomatik kayar.
 
-| Gereksinim | Açıklama | Öncelik |
-|---|---|---|
-| Sayfa üzerinde açılma | Herhangi bir siteye inject edilerek açılır | Zorunlu |
-| Sürüklenebilirlik | Overlay fare ile sürüklenip konumlandırılabilir | Zorunlu |
-| Yeniden boyutlandırma | Overlay köşelerinden boyutu değiştirilebilir | Zorunlu |
-| Konum ve boyut hafızası | Kapatılıp açılsa bile son konum ve boyut korunur | Zorunlu |
-| Sayfa etkileşimini bloklamamak | Overlay dışındaki alanlara tıklamak çalışmaya devam etmeli | Zorunlu |
-| Kapatma butonu | Overlay'i kapatan bir X butonu | Zorunlu |
-
-### 2.2 Görsel Ayarlar
-
-| Gereksinim | Açıklama | Öncelik |
-|---|---|---|
-| Arka plan opaklığı | 0% (tam şeffaf) – 100% (opak) arası slider ile ayarlanabilir | Zorunlu |
-| Font büyüklüğü | Slider veya +/- ile ayarlanabilir (ör. 16–120px) | Zorunlu |
-| Yazı rengi | Kullanıcı seçebilir (varsayılan: beyaz) | İstenen |
-| Arka plan rengi | Kullanıcı seçebilir (varsayılan: siyah) | İstenen |
-| Yazı hizalaması | Sol / Orta / Sağ | İstenen |
-
-### 2.3 Kaydırma Kontrolü
-
-| Gereksinim | Açıklama | Öncelik |
-|---|---|---|
-| Play / Pause | Butona basınca metin kayar, tekrar basınca durur | Zorunlu |
-| Kaydırma hızı | Slider ile 1x – 10x arası ayarlanabilir | Zorunlu |
-| Reset | Metni başa döndürür | Zorunlu |
-| Klavye kısayolları | Boşluk = play/pause; yukarı/aşağı ok = hız ayarı | Zorunlu |
-| Kaydırma yönü | Aşağıdan yukarıya — klasik studio teleprompter (metin yukarı kayar, yeni içerik alttan gelir) | Zorunlu |
-| Manuel konum | Kullanıcı scroll ederek okuma yerini değiştirebilir | İstenen |
-
-### 2.4 Metin Yönetimi
-
-| Gereksinim | Açıklama | Öncelik |
-|---|---|---|
-| Metin giriş alanı | Overlay içinde yazılır (ayrı popup yok) | Zorunlu |
-| Otomatik kaydetme | Metin tarayıcı storage'a otomatik kaydedilir | Zorunlu |
-| Dosya yükleme | .txt dosyası içe aktarma | İstenen |
-
-### 2.5 Kontrol Arayüzü (UI Bileşenleri)
-
-Overlay üzerinde iki mod öngörülür:
-
-**Düzenleme Modu** — Overlay ilk açıldığında:
-- Metin giriş alanı
-- Ayarlar (font, opaklık, renk)
-- Play butonu
-
-**Okuma Modu** — Play'e basıldığında:
-- Sadece kayan metin
-- Kontrol çubuğu her zaman görünür (sabit): Pause, Reset, Hız slider, Kapat
+MVP hedefi: **Windows + macOS + Linux üzerinde sorunsuz çalışan, stabil ve basit bir teleprompter deneyimi**.
 
 ---
 
-## 3. Teknik Gereksinimler
+## 2. Problem Tanımı
 
-### 3.1 Extension Yapısı
-
-| Bileşen | Açıklama |
-|---|---|
-| `manifest.json` | Manifest V3 (Chrome/Edge/Firefox uyumlu) |
-| Content Script | Sayfaya overlay'i inject eder; ikon tıklandığında toggle eder |
-| Background Service Worker | Ayarları ve metni storage'da yönetir |
-| Storage | `chrome.storage.local` ile kalıcı veri saklama |
-
-### 3.2 Overlay Teknik Detayları
-
-- `position: fixed` veya `position: absolute` ile sayfa üzerine yerleşir
-- `z-index: 999999` ile her zaman üstte
-- `pointer-events: none` — metin alanı dışında tıklamalara izin vermek için seçici uygulanır
-- Opaklık için CSS `background: rgba(...)` veya `opacity` kullanılır
-- Kaydırma: CSS `animation` veya `requestAnimationFrame` ile smooth scroll
-
-### 3.3 Tarayıcı Uyumluluğu
-
-| Tarayıcı | Destek |
-|---|---|
-| Chrome | Zorunlu (Manifest V3) |
-| Edge | Otomatik (Chromium tabanlı) |
-| Firefox | İstenen (Manifest V2/V3 uyumluluk) |
-| Safari | Kapsam dışı (v1.0) |
-
-### 3.4 Performans
-
-| Gereksinim | Hedef |
-|---|---|
-| Overlay açılma süresi | < 200ms |
-| Kaydırma akıcılığı | 60 FPS |
-| CPU kullanımı | Kaydırma sırasında < %5 |
-| Sayfa performansına etkisi | Sayfa yükünü etkilememeli |
+Tarayıcı tabanlı yaklaşımda siteye inject etme, güvenlik politikaları (CSP), sayfa içi stil/JS çakışmaları ve bazı URL kısıtları nedeniyle kullanıcı deneyimi tutarsızlaşmaktadır.  
+Desktop yaklaşımı ile uygulama bu dış bağımlılıklardan ayrılarak daha öngörülebilir hale gelecektir.
 
 ---
 
-## 4. Kullanıcı Akışı (Detaylı)
+## 3. Hedefler (MVP)
 
-### 4.1 İlk Kullanım
-
-```
-1. Kullanıcı Chrome Web Store'dan eklentiyi yükler
-2. Herhangi bir siteye gider
-3. Eklenti ikonuna tıklar → popup açılır
-4. Metni girer, ayarları yapar
-5. "Aç" butonuna basar → Overlay sayfaya inject edilir
-6. Overlay'i istediği yere sürükler, boyutlandırır
-7. PLAY → Metin kaymaya başlar
-```
-
-### 4.2 Tekrar Kullanım
-
-```
-1. Eklenti ikonuna tıklar
-2. Önceki metin ve ayarlar otomatik yüklenir
-3. PLAY → Kullanıma hazır
-```
+1. Tüm temel işletim sistemlerinde tek ürün davranışı sağlamak.
+2. Düşük öğrenme eğrisi ile hızlı kullanım sunmak (aç → metni yapıştır → play).
+3. Konfigürasyon ve metni yerelde kalıcı tutmak.
+4. Akıcı kaydırma performansı sunmak.
 
 ---
 
-## 5. UI Eskizi
+## 4. Kapsam (MVP)
 
-### Overlay (Okuma Modu)
+### 4.1 Zorunlu Özellikler
 
-```
-+=========================================+
-|  Lorem ipsum dolor sit amet,            |
-|  consectetur adipiscing elit.           |
-|  Sed do eiusmod tempor incididunt       |
-|  ut labore et dolore magna aliqua.      |
-|                                         |
-|  Ut enim ad minim veniam, quis          |
-|  nostrud exercitation ullamco...        |
-+=========================================+
-| ⏸  ↺   Hız: [----o----]          [✕]  |
-+-----------------------------------------+
-```
+- **Metin Girişi:** Uygulama içinde çok satırlı metin alanı.
+- **Modlar:**
+  - Düzenleme Modu (metin + ayarlar)
+  - Okuma Modu (kayan metin + kontrol çubuğu)
+- **Oynatma Kontrolü:** Play/Pause, Reset.
+- **Kaydırma Hızı:** Slider ile ayar.
+- **Görsel Ayarlar:** Font boyutu, metin rengi, arka plan rengi, arka plan opaklığı.
+- **Pencere Davranışı:** Sürüklenebilir, yeniden boyutlandırılabilir, her zaman üstte kullanılabilir.
+- **Klavye Kısayolları:**
+  - `Space`: Play/Pause
+  - `ArrowUp`: Hız artır
+  - `ArrowDown`: Hız azalt
+  - `Esc`: Okuma modundan çık / pencereyi gizle (uygulama kararına göre)
+- **Kalıcı Saklama:** Metin + ayarların uygulama kapanıp açıldığında korunması.
 
-- Arka plan: siyah %70 opaklık (ayarlanabilir)
-- Metin: beyaz, büyük punto
-- Kontrol çubuğu: altta sabit, ince, yarı şeffaf
-
-### Popup (Ayarlar ve Metin Girişi)
-
-```
-+---------------------------+
-| Teleprompter              |
-+---------------------------+
-| [Metin alanı              |
-|  ...                      |
-|  ...                    ] |
-|                           |
-| Font: [--o-------] 32px   |
-| Opaklık: [-----o--] 70%   |
-| Renk: [■] Arkaplan: [■]   |
-|                           |
-|       [Overlay'i Aç]      |
-+---------------------------+
-```
-
----
-
-## 6. Kapsam Dışı (v1.0)
+### 4.2 Kapsam Dışı (MVP Hariç)
 
 - Bulut senkronizasyonu
-- Birden fazla metin/senaryo yönetimi
-- Ayna görüntüsü (mirror) modu
-- Uzaktan kontrol (telefon ile)
-- RTL (sağdan sola) dil desteği
-- Safari desteği
-- Video overlay / green screen entegrasyonu
+- Çoklu script/proje yönetimi
+- Uzaktan kumanda (telefon vb.)
+- Ayna (mirror) modu
+- Otomatik konuşma hızı senkronizasyonu
+- Ekip içi paylaşım / işbirliği
 
 ---
 
-## 7. Açık Sorular
+## 5. Hedef Kullanıcılar
 
-- [x] Kaydırma yönü: aşağıdan yukarıya (klasik studio teleprompter) — KARARLANDI
-- [x] Metin girişi: overlay içinde, ayrı popup yok — KARARLANDI
-- [x] Kontrol çubuğu: her zaman görünür (sabit) — KARARLANDI
-- [x] Firefox desteği: v1.0'da dahil (Manifest V3 uyumlu) — KARARLANDI
+- İçerik üreticileri
+- Online sunum yapan profesyoneller
+- Eğitim videoları hazırlayan kullanıcılar
+
+---
+
+## 6. Platform ve Destek
+
+MVP’de resmi hedef:
+
+- **Windows:** 10 ve üzeri
+- **macOS:** 13 ve üzeri
+- **Linux:** Ubuntu 22.04+ (ilk referans dağıtım)
+
+Not: Linux tarafında farklı dağıtımlar için ek paketleme testleri post-MVP’de genişletilebilir.
+
+---
+
+## 7. UX Akışı (MVP)
+
+1. Uygulama açılır.
+2. Kullanıcı metni yazar/yapıştırır.
+3. Font, opaklık ve hız ayarlarını yapar.
+4. Play ile okuma moduna geçer.
+5. Metin aşağıdan yukarı kayar.
+6. Pause/Reset ile kontrol eder.
+7. Uygulama kapatılıp açıldığında son durum geri yüklenir.
+
+---
+
+## 8. Teknik Yaklaşım (MVP)
+
+- **Uygulama tipi:** Cross-platform desktop app.
+- **Önerilen başlangıç:** Electron (MVP’de en hızlı stabil dağıtım için).
+- **Render:** Tek pencere + UI katmanı.
+- **Animasyon:** `requestAnimationFrame` tabanlı scroll.
+- **Yerel veri:** Ayarlar ve metin için yerel depolama (JSON tabanlı veya platform storage).
+
+---
+
+## 9. Performans ve Kalite Kriterleri
+
+- Uygulama açılış süresi: hedef < 2 saniye
+- Kaydırma akıcılığı: hedef 60 FPS’ye yakın deneyim
+- Kullanım sırasında belirgin takılma olmaması
+- Çökme olmadan en az 30 dakikalık kesintisiz okuma
+
+---
+
+## 10. MVP Kabul Kriterleri
+
+1. Üç platformda (Windows/macOS/Linux) uygulama açılıp temel akış çalışır.
+2. Play/Pause/Reset beklenen şekilde çalışır.
+3. Hız, font ve opaklık ayarları anında etkilenir.
+4. Metin ve ayarlar uygulama yeniden başlatıldığında geri gelir.
+5. Klavye kısayolları çalışır.
+6. Okuma modunda metin yönü aşağıdan yukarıdır.
+
+---
+
+## 11. Riskler ve Notlar
+
+- Linux paketleme ve dağıtım farklılıkları MVP sonrası ek test gerektirebilir.
+- Her platformda pencere yönetimi davranışları (always-on-top, focus vb.) ayrı doğrulanmalıdır.
+
+---
+
+## 12. Sonraki Adım
+
+Bu PRD onaylandıktan sonra yapılacak ilk çıktı:  
+**Tek pencere, iki modlu, yerel saklamalı desktop teleprompter MVP teknik iskeleti.**
