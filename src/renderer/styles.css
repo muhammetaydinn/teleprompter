@@ -200,45 +200,6 @@ input[type="color"] {
   position: relative;
 }
 
-.read-wrap::before,
-.read-wrap::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 88px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.read-wrap::before {
-  top: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(
-      var(--tp-bg-r),
-      var(--tp-bg-g),
-      var(--tp-bg-b),
-      calc(var(--tp-opacity) * 0.94)
-    ),
-    rgba(var(--tp-bg-r), var(--tp-bg-g), var(--tp-bg-b), 0)
-  );
-}
-
-.read-wrap::after {
-  bottom: 0;
-  background: linear-gradient(
-    to top,
-    rgba(
-      var(--tp-bg-r),
-      var(--tp-bg-g),
-      var(--tp-bg-b),
-      calc(var(--tp-opacity) * 0.94)
-    ),
-    rgba(var(--tp-bg-r), var(--tp-bg-g), var(--tp-bg-b), 0)
-  );
-}
-
 .read-text {
   padding: 24px 30px 72px;
   white-space: pre-wrap;

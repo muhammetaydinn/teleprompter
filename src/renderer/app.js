@@ -55,6 +55,7 @@ init().catch(() => {
   applyStateToUi();
   applyVisualState();
   syncEditorVisibility();
+  syncReadEditability();
   updatePlayPauseLabel();
 });
 
@@ -65,6 +66,7 @@ async function init() {
   applyVisualState();
   syncReadText();
   syncEditorVisibility();
+  syncReadEditability();
 
   if (window.windowControls?.setAlwaysOnTop) {
     try {
@@ -134,6 +136,15 @@ function bindEvents() {
 
   elements.bgColor.addEventListener("input", (event) => {
     setBackgroundColor(event.target.value);
+  });
+
+  elements.readText.addEventListener("input", () => {
+    state.text = getReadTextValue();
+    saveState();
+
+    requestAnimationFrame(() => {
+      refreshReadViewport();
+    });
   });
 
   elements.alwaysOnTop.addEventListener("change", (event) => {
@@ -218,6 +229,7 @@ function syncReadText() {
 
 function togglePlayPause() {
   playing = !playing;
+  syncReadEditability();
   updatePlayPauseLabel();
 
   if (playing) {
@@ -230,6 +242,7 @@ function togglePlayPause() {
 function resetRead() {
   stopAnimation();
   playing = false;
+  syncReadEditability();
   scrollPos = 0;
   refreshReadViewport();
   updatePlayPauseLabel();
@@ -291,6 +304,16 @@ function updatePlayPauseLabel() {
   elements.playPauseBtn.textContent = playing
     ? t("controls.pause")
     : t("controls.play");
+}
+
+function syncReadEditability() {
+  const editable = !playing;
+  elements.readText.setAttribute("contenteditable", editable ? "true" : "false");
+  elements.readText.setAttribute("spellcheck", editable ? "true" : "false");
+
+  if (!editable && document.activeElement === elements.readText) {
+    elements.readText.blur();
+  }
 }
 
 function updateSpeed(nextSpeed) {
@@ -362,7 +385,9 @@ function onKeyDown(event) {
   const target = event.target;
   const isFormControl =
     target instanceof HTMLElement &&
-    (target.tagName === "TEXTAREA" || target.tagName === "INPUT");
+    (target.tagName === "TEXTAREA" ||
+      target.tagName === "INPUT" ||
+      target.isContentEditable);
 
   if (isFormControl) {
     return;
@@ -475,4 +500,11 @@ function isHexColor(value) {
 
 function t(key) {
   return I18N[key] ?? key;
+}
+
+function getReadTextValue() {
+  return (elements.readText.innerText || "")
+    .replace(/\u00a0/g, " ")
+    .replace(/\r/g, "")
+    .replace(/\n$/, "");
 }

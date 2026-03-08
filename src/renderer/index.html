@@ -10,17 +10,18 @@
     <div class="app" id="app">
       <section id="readPanel" class="panel read-panel">
         <div class="read-wrap" id="readWrap">
-          <div class="read-text" id="readText"></div>
+          <div
+            class="read-text"
+            id="readText"
+            data-i18n-attr="data-placeholder:read.placeholder"
+          ></div>
         </div>
 
         <div class="controls">
-          <button
-            id="playPauseBtn"
-            class="ctrl-btn toggleable-control"
-          ></button>
+          <button id="playPauseBtn" class="ctrl-btn"></button>
           <button
             id="resetBtn"
-            class="ctrl-btn toggleable-control"
+            class="ctrl-btn"
             data-i18n="controls.reset"
           ></button>
 
