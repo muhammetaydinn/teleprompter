@@ -1,136 +1,139 @@
 # Teleprompter Desktop App — MVP PRD
 
-**Tarih:** 2026-03-09  
-**Versiyon:** 0.1 (MVP)  
-**Durum:** Onaya hazır
+**Date:** 2026-03-09  
+**Version:** 0.2 (MVP, i18n-ready)  
+**Status:** Draft approved for implementation
 
 ---
 
-## 1. Ürün Özeti
+## 1. Product Summary
 
-Tarayıcıdan bağımsız çalışan, masaüstü üzerinde kullanılabilen bir teleprompter uygulaması geliştirilecektir.  
-Kullanıcı metni uygulama içinde düzenler, okuma moduna geçer ve metin aşağıdan yukarıya otomatik kayar.
+This project is a browser-independent desktop teleprompter application.
+Users write or paste a script, switch to read mode, and scroll text from bottom to top.
 
-MVP hedefi: **Windows + macOS + Linux üzerinde sorunsuz çalışan, stabil ve basit bir teleprompter deneyimi**.
-
----
-
-## 2. Problem Tanımı
-
-Tarayıcı tabanlı yaklaşımda siteye inject etme, güvenlik politikaları (CSP), sayfa içi stil/JS çakışmaları ve bazı URL kısıtları nedeniyle kullanıcı deneyimi tutarsızlaşmaktadır.  
-Desktop yaklaşımı ile uygulama bu dış bağımlılıklardan ayrılarak daha öngörülebilir hale gelecektir.
+MVP goal: **a stable, simple, cross-platform teleprompter for Windows, macOS, and Linux**.
 
 ---
 
-## 3. Hedefler (MVP)
+## 2. Problem Statement
 
-1. Tüm temel işletim sistemlerinde tek ürün davranışı sağlamak.
-2. Düşük öğrenme eğrisi ile hızlı kullanım sunmak (aç → metni yapıştır → play).
-3. Konfigürasyon ve metni yerelde kalıcı tutmak.
-4. Akıcı kaydırma performansı sunmak.
+Browser-based overlays can break due to CSP limitations, site-level CSS/JS conflicts, and restricted pages.
+A desktop-first architecture removes these external constraints and delivers predictable behavior.
 
 ---
 
-## 4. Kapsam (MVP)
+## 3. MVP Goals
 
-### 4.1 Zorunlu Özellikler
-
-- **Metin Girişi:** Uygulama içinde çok satırlı metin alanı.
-- **Modlar:**
-  - Düzenleme Modu (metin + ayarlar)
-  - Okuma Modu (kayan metin + kontrol çubuğu)
-- **Oynatma Kontrolü:** Play/Pause, Reset.
-- **Kaydırma Hızı:** Slider ile ayar.
-- **Görsel Ayarlar:** Font boyutu, metin rengi, arka plan rengi, arka plan opaklığı.
-- **Pencere Davranışı:** Sürüklenebilir, yeniden boyutlandırılabilir, her zaman üstte kullanılabilir.
-- **Klavye Kısayolları:**
-  - `Space`: Play/Pause
-  - `ArrowUp`: Hız artır
-  - `ArrowDown`: Hız azalt
-  - `Esc`: Okuma modundan çık / pencereyi gizle (uygulama kararına göre)
-- **Kalıcı Saklama:** Metin + ayarların uygulama kapanıp açıldığında korunması.
-
-### 4.2 Kapsam Dışı (MVP Hariç)
-
-- Bulut senkronizasyonu
-- Çoklu script/proje yönetimi
-- Uzaktan kumanda (telefon vb.)
-- Ayna (mirror) modu
-- Otomatik konuşma hızı senkronizasyonu
-- Ekip içi paylaşım / işbirliği
+1. Consistent behavior across all core operating systems.
+2. Fast start-to-use flow (open app → paste script → start).
+3. Persistent local storage for script and settings.
+4. Smooth scrolling performance for long reading sessions.
 
 ---
 
-## 5. Hedef Kullanıcılar
+## 4. MVP Scope
 
-- İçerik üreticileri
-- Online sunum yapan profesyoneller
-- Eğitim videoları hazırlayan kullanıcılar
+### 4.1 Required Features
 
----
+- Multi-line script input inside the app.
+- Two modes:
+  - **Edit mode** (script + settings)
+  - **Read mode** (scrolling text + controls)
+- Playback controls: Play/Pause, Reset.
+- Speed control: slider + incremental `+/-` adjustment.
+- Visual settings: font size, text color, background color, opacity.
+- Window behavior: resizable, draggable, optionally always on top.
+- Keyboard shortcuts:
+  - `Space` → Play/Pause
+  - `ArrowUp` → Increase speed
+  - `ArrowDown` → Decrease speed
+  - `Esc` → Exit read mode
+- Persistent state after app restart.
+- Read-mode script editing (script can be edited after pressing Start).
+- i18n-ready text architecture using a centralized English language resource.
 
-## 6. Platform ve Destek
+### 4.2 Out of Scope (Post-MVP)
 
-MVP’de resmi hedef:
-
-- **Windows:** 10 ve üzeri
-- **macOS:** 13 ve üzeri
-- **Linux:** Ubuntu 22.04+ (ilk referans dağıtım)
-
-Not: Linux tarafında farklı dağıtımlar için ek paketleme testleri post-MVP’de genişletilebilir.
-
----
-
-## 7. UX Akışı (MVP)
-
-1. Uygulama açılır.
-2. Kullanıcı metni yazar/yapıştırır.
-3. Font, opaklık ve hız ayarlarını yapar.
-4. Play ile okuma moduna geçer.
-5. Metin aşağıdan yukarı kayar.
-6. Pause/Reset ile kontrol eder.
-7. Uygulama kapatılıp açıldığında son durum geri yüklenir.
-
----
-
-## 8. Teknik Yaklaşım (MVP)
-
-- **Uygulama tipi:** Cross-platform desktop app.
-- **Önerilen başlangıç:** Electron (MVP’de en hızlı stabil dağıtım için).
-- **Render:** Tek pencere + UI katmanı.
-- **Animasyon:** `requestAnimationFrame` tabanlı scroll.
-- **Yerel veri:** Ayarlar ve metin için yerel depolama (JSON tabanlı veya platform storage).
+- Cloud sync
+- Multi-script library management
+- Remote control from mobile
+- Mirror mode
+- Speech-sync automation
+- Collaboration and sharing workflows
 
 ---
 
-## 9. Performans ve Kalite Kriterleri
+## 5. Target Users
 
-- Uygulama açılış süresi: hedef < 2 saniye
-- Kaydırma akıcılığı: hedef 60 FPS’ye yakın deneyim
-- Kullanım sırasında belirgin takılma olmaması
-- Çökme olmadan en az 30 dakikalık kesintisiz okuma
-
----
-
-## 10. MVP Kabul Kriterleri
-
-1. Üç platformda (Windows/macOS/Linux) uygulama açılıp temel akış çalışır.
-2. Play/Pause/Reset beklenen şekilde çalışır.
-3. Hız, font ve opaklık ayarları anında etkilenir.
-4. Metin ve ayarlar uygulama yeniden başlatıldığında geri gelir.
-5. Klavye kısayolları çalışır.
-6. Okuma modunda metin yönü aşağıdan yukarıdır.
+- Content creators
+- Online presenters
+- Educators and video producers
 
 ---
 
-## 11. Riskler ve Notlar
+## 6. Platform Support
 
-- Linux paketleme ve dağıtım farklılıkları MVP sonrası ek test gerektirebilir.
-- Her platformda pencere yönetimi davranışları (always-on-top, focus vb.) ayrı doğrulanmalıdır.
+MVP target platforms:
+
+- **Windows:** 10+
+- **macOS:** 13+
+- **Linux:** Ubuntu 22.04+ (reference distro)
 
 ---
 
-## 12. Sonraki Adım
+## 7. UX Flow (MVP)
 
-Bu PRD onaylandıktan sonra yapılacak ilk çıktı:  
-**Tek pencere, iki modlu, yerel saklamalı desktop teleprompter MVP teknik iskeleti.**
+1. Open app.
+2. Type or paste script.
+3. Configure font, opacity, colors, and speed.
+4. Press Start to switch to read mode.
+5. Text scrolls bottom-to-top.
+6. Control with Play/Pause, Reset, speed slider, and `+/-` step buttons.
+7. Optionally edit script directly in read mode.
+8. Restart app and continue from stored state.
+
+---
+
+## 8. Technical Approach
+
+- Cross-platform desktop architecture (Electron-based MVP).
+- Single-window renderer UI.
+- Scroll loop via `requestAnimationFrame`.
+- Persistent local state storage.
+- i18n architecture with centralized dictionary files (currently `en`).
+
+---
+
+## 9. Performance & Quality Targets
+
+- Startup target: < 2 seconds
+- Smooth scrolling near 60 FPS
+- No visible stutter during normal operation
+- Stable operation for at least 30-minute read sessions
+
+---
+
+## 10. MVP Acceptance Criteria
+
+1. App runs on Windows, macOS, Linux with core workflow.
+2. Play/Pause/Reset works correctly.
+3. Speed, font size, and opacity update instantly.
+4. Script and settings are restored after restart.
+5. Keyboard shortcuts function in read mode.
+6. Scroll direction is bottom-to-top.
+7. Read-mode editing works and stays persistent.
+8. UI text is sourced from i18n resources (English file).
+
+---
+
+## 11. Risks
+
+- Linux packaging may require distro-specific validation.
+- Window behavior differences (always-on-top, focus) may vary by platform.
+
+---
+
+## 12. Next Steps
+
+- Add additional locales (`tr`, `de`, etc.) using the i18n structure.
+- Add build/release pipeline for packaged binaries.

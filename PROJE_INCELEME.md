@@ -1,84 +1,59 @@
-# Teleprompter Proje İncelemesi
+# Teleprompter Project Review
 
-**Tarih:** 2026-03-09  
-**Kapsam:** Mevcut kod tabanının ve PRD uyumunun kısa teknik analizi
-
----
-
-## 1) Proje Nedir?
-
-Bu proje, herhangi bir web sayfası üzerinde çalışan bir **teleprompter overlay** tarayıcı eklentisidir.  
-Kullanıcı eklenti ikonuna tıkladığında sayfa üstünde bir panel açılır/kapanır; metin girilir, görünüm ayarlanır ve metin klasik teleprompter mantığıyla **aşağıdan yukarı** kaydırılır.
+**Date:** 2026-03-09  
+**Scope:** Current desktop MVP implementation status and architecture snapshot
 
 ---
 
-## 2) Teknik Mimari
+## 1) What This Project Is
 
-### `manifest.json`
-
-- Manifest V3 kullanılıyor.
-- `background.service_worker` olarak `background.js` tanımlı.
-- `content_scripts` ile `content.js`, `http/https` sayfalarda `document_idle` anında yükleniyor.
-- İzinler: `storage`, `activeTab`, `scripting`.
-
-### `background.js`
-
-- Eklenti ikon tıklamasını (`chrome.action.onClicked`) dinliyor.
-- Aktif sekmeye önce `TOGGLE` mesajı gönderiyor.
-- Content script yüklü değilse `chrome.scripting.executeScript` ile `content.js` enjekte edip tekrar `TOGGLE` gönderiyor.
-- Kısıtlı sayfalarda (ör. `chrome://`) hatayı sessizce geçiyor.
-
-### `content.js`
-
-- Asıl teleprompter UI/logic burada.
-- Shadow DOM içinde izole overlay oluşturuyor.
-- Çift yüklenmeyi engelleyen guard (`window.__tp_loaded`) içeriyor.
-- Durumu `chrome.storage.local` altında `tp` anahtarı ile saklıyor.
-- İki mod var:
-  - **Edit modu:** metin girişi + ayarlar
-  - **Read modu:** kayan metin + kontrol çubuğu
+This repository now contains a desktop-first teleprompter MVP built with Electron.
+It focuses on script writing, read-mode scrolling, speed control, visual customization, always-on-top behavior, and local persistence.
 
 ---
 
-## 3) Uygulanan Ana Özellikler
+## 2) Current Architecture
 
-- Overlay aç/kapat (ikon ile toggle)
-- Sürükle-bırak ile konumlandırma
-- Yeniden boyutlandırma (minimum boyut sınırlarıyla)
-- Font boyutu, opaklık, metin/arka plan rengi ayarı
-- Hız ayarı (slider), play/pause ve reset
-- Klavye kısayolları:
-  - `Space`: play/pause
-  - `ArrowUp` / `ArrowDown`: hız artır/azalt
-- Metin ve ayarların kalıcı saklanması
-- `requestAnimationFrame` tabanlı akıcı kaydırma animasyonu
+- `src/main.js`
+  - Electron main process
+  - BrowserWindow lifecycle
+  - IPC handlers for always-on-top control
 
----
+- `src/preload.js`
+  - Secure bridge (`windowControls`) between renderer and main process
+  - Exposes always-on-top methods
 
-## 4) PRD ile Uyum Değerlendirmesi
+- `src/renderer/index.html`
+  - Edit mode and read mode layout
+  - UI nodes use i18n keys (`data-i18n`, `data-i18n-attr`)
 
-PRD (`PRD.md`) ile karşılaştırıldığında:
+- `src/renderer/app.js`
+  - Teleprompter behavior (mode switch, playback, animation loop)
+  - Speed slider + `+/-` step controls
+  - Keyboard shortcuts and persistence
+  - Runtime i18n key resolution and UI text binding
 
-### Büyük ölçüde karşılanan maddeler
-
-- Overlay’in sayfaya enjekte edilmesi
-- Sürüklenebilirlik
-- Yeniden boyutlandırma
-- Konum/boyut ve metin/ayar hafızası
-- Edit ve Read mod ayrımı
-- Play/Pause, hız kontrolü, reset
-- Klasik yön: aşağıdan yukarı kaydırma
-- Kısayol tuşları
-
-### Kısmi / eksik görünen maddeler
-
-- **Tarayıcı uyumluluğu iddiası:** Kod doğrudan `chrome.*` API kullanıyor; Chrome/Chromium tarafı hazır, Firefox için ek uyumluluk doğrulaması gerekebilir.
-- **PRD teknik notu (`pointer-events: none`)** birebir uygulanmıyor; mevcut yaklaşım overlay üzerinde etkileşimi yöneterek çalışıyor.
-- PRD’de “istenen” bazı geliştirmeler (ör. dosyadan `.txt` içe aktarma, manuel scroll pozisyonu) henüz eklenmemiş.
+- `src/renderer/i18n/en.js`
+  - Centralized English dictionary for user-facing strings
 
 ---
 
-## 5) Sonuç
+## 3) Implemented MVP Features
 
-Mevcut repo, **MVP düzeyinde işlevsel bir teleprompter extension** sunuyor ve PRD’nin zorunlu gereksinimlerinin büyük kısmını karşılıyor.  
-En kritik sonraki adım, hedeflenen çoklu tarayıcı desteği (özellikle Firefox) için API uyumluluk katmanını netleştirmek ve istenen özellikleri (ör. dosya importu) önceliklendirmek.
+- Script input and editing
+- Start/read mode with bottom-to-top scroll
+- Play/Pause/Reset controls
+- Speed controls via slider, keyboard, and `+/-` step buttons
+- Font size, opacity, text color, background color
+- Always-on-top toggle
+- Read-mode script editing after Start
+- Persistent local state across restarts
+- i18n-ready UI text system with centralized English resource
+
+---
+
+## 4) Notes
+
+- Source-level Turkish UI strings were removed from runtime files.
+- All user-facing app strings are now centralized in `src/renderer/i18n/en.js`.
+- The project is prepared for adding additional locale files without restructuring the core UI logic.
