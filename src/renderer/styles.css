@@ -108,8 +108,14 @@ body {
   font-size: 12px;
 }
 
+.step-row,
 .speed-row {
   gap: 6px;
+}
+
+.step-value {
+  min-width: 52px;
+  text-align: center !important;
 }
 
 .settings-grid span {

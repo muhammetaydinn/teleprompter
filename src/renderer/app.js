@@ -4,6 +4,8 @@ const LOCALE = "en";
 const I18N = window.__APP_I18N__?.[LOCALE] ?? {};
 const STORAGE_KEY = "teleprompter-mvp-state-v1";
 const SPEED_STEP = 0.1;
+const FONT_STEP = 1;
+const OPACITY_STEP = 1;
 
 const DEFAULT_STATE = {
   speed: 3,
@@ -23,11 +25,12 @@ const state = {
 
 const elements = {
   app: document.getElementById("app"),
-  fontSize: document.getElementById("fontSize"),
+  fontDown: document.getElementById("fontDown"),
+  fontUp: document.getElementById("fontUp"),
   fontValue: document.getElementById("fontValue"),
-  opacity: document.getElementById("opacity"),
+  opacityDown: document.getElementById("opacityDown"),
+  opacityUp: document.getElementById("opacityUp"),
   opacityValue: document.getElementById("opacityValue"),
-  speed: document.getElementById("speed"),
   speedDown: document.getElementById("speedDown"),
   speedUp: document.getElementById("speedUp"),
   speedValue: document.getElementById("speedValue"),
@@ -110,16 +113,20 @@ function applyI18n() {
 }
 
 function bindEvents() {
-  elements.fontSize.addEventListener("input", (event) => {
-    setFontSize(Number(event.target.value));
+  elements.fontDown.addEventListener("click", () => {
+    stepFontSize(-FONT_STEP);
   });
 
-  elements.opacity.addEventListener("input", (event) => {
-    setOpacity(Number(event.target.value));
+  elements.fontUp.addEventListener("click", () => {
+    stepFontSize(FONT_STEP);
   });
 
-  elements.speed.addEventListener("input", (event) => {
-    updateSpeed(Number(event.target.value));
+  elements.opacityDown.addEventListener("click", () => {
+    stepOpacity(-OPACITY_STEP);
+  });
+
+  elements.opacityUp.addEventListener("click", () => {
+    stepOpacity(OPACITY_STEP);
   });
 
   elements.speedDown.addEventListener("click", () => {
@@ -167,9 +174,6 @@ function bindEvents() {
 }
 
 function applyStateToUi() {
-  elements.fontSize.value = String(state.fontSize);
-  elements.opacity.value = String(state.opacity);
-  elements.speed.value = String(state.speed);
   elements.textColor.value = state.textColor;
   elements.bgColor.value = state.bgColor;
 
@@ -184,18 +188,24 @@ function applyStateToUi() {
 
 function setFontSize(nextFontSize) {
   state.fontSize = normalizeFontSize(nextFontSize);
-  elements.fontSize.value = String(state.fontSize);
   elements.fontValue.textContent = `${state.fontSize}${t("units.px")}`;
   applyVisualState();
   saveState();
 }
 
+function stepFontSize(delta) {
+  setFontSize(state.fontSize + delta);
+}
+
 function setOpacity(nextOpacity) {
   state.opacity = normalizeOpacity(nextOpacity);
-  elements.opacity.value = String(state.opacity);
   elements.opacityValue.textContent = `${state.opacity}${t("units.percent")}`;
   applyVisualState();
   saveState();
+}
+
+function stepOpacity(delta) {
+  setOpacity(state.opacity + delta);
 }
 
 function setTextColor(nextTextColor) {
@@ -349,7 +359,6 @@ function syncReadEditability() {
 
 function updateSpeed(nextSpeed) {
   state.speed = normalizeSpeed(nextSpeed);
-  elements.speed.value = String(state.speed);
   elements.speedValue.textContent = `${state.speed}${t("units.speed")}`;
   saveState();
 }

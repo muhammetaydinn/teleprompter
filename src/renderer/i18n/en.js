@@ -29,6 +29,10 @@ window.__APP_I18N__ = {
 
     "aria.speed.decrease": "Decrease speed",
     "aria.speed.increase": "Increase speed",
+    "aria.font.decrease": "Decrease font",
+    "aria.font.increase": "Increase font",
+    "aria.opacity.decrease": "Decrease opacity",
+    "aria.opacity.increase": "Increase opacity",
 
     "units.px": "px",
     "units.percent": "%",

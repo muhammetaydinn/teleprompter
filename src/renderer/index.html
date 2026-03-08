@@ -29,16 +29,46 @@
         </div>
 
         <div class="settings-grid controls-settings toggleable-control">
-          <label>
+          <label class="step-row">
             <span data-i18n="settings.font"></span>
-            <strong id="fontValue"></strong>
-            <input id="fontSize" type="range" min="16" max="120" value="40" />
+            <button
+              id="fontDown"
+              class="speed-step-btn"
+              type="button"
+              data-i18n-attr="aria-label:aria.font.decrease"
+            >
+              −
+            </button>
+            <strong id="fontValue" class="step-value"></strong>
+            <button
+              id="fontUp"
+              class="speed-step-btn"
+              type="button"
+              data-i18n-attr="aria-label:aria.font.increase"
+            >
+              +
+            </button>
           </label>
 
-          <label>
+          <label class="step-row">
             <span data-i18n="settings.opacity"></span>
-            <strong id="opacityValue"></strong>
-            <input id="opacity" type="range" min="0" max="100" value="85" />
+            <button
+              id="opacityDown"
+              class="speed-step-btn"
+              type="button"
+              data-i18n-attr="aria-label:aria.opacity.decrease"
+            >
+              −
+            </button>
+            <strong id="opacityValue" class="step-value"></strong>
+            <button
+              id="opacityUp"
+              class="speed-step-btn"
+              type="button"
+              data-i18n-attr="aria-label:aria.opacity.increase"
+            >
+              +
+            </button>
           </label>
 
           <label class="speed-row">
@@ -51,7 +81,7 @@
             >
               −
             </button>
-            <strong id="speedValue"></strong>
+            <strong id="speedValue" class="step-value"></strong>
             <button
               id="speedUp"
               class="speed-step-btn"
@@ -60,14 +90,6 @@
             >
               +
             </button>
-            <input
-              id="speed"
-              type="range"
-              min="0.1"
-              max="20"
-              step="0.1"
-              value="3"
-            />
           </label>
 
           <label>
