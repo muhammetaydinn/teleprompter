@@ -1,24 +1,22 @@
-"use strict";
+import {
+  DEFAULT_STATE,
+  FONT_STEP,
+  LOCALE,
+  OPACITY_STEP,
+  SPEED_STEP,
+  STORAGE_KEY,
+} from "./modules/config.js";
+import { bindStepButtonHold, bindStepInput } from "./modules/controls.js";
+import {
+  getReadTextValue,
+  hexToRgb,
+  isHexColor,
+  normalizeFontSize,
+  normalizeOpacity,
+  normalizeSpeed,
+} from "./modules/helpers.js";
 
-const LOCALE = "en";
 const I18N = window.__APP_I18N__?.[LOCALE] ?? {};
-const STORAGE_KEY = "teleprompter-mvp-state-v1";
-const SPEED_STEP = 0.1;
-const FONT_STEP = 1;
-const OPACITY_STEP = 1;
-const HOLD_START_DELAY_MS = 280;
-const HOLD_REPEAT_INTERVAL_MS = 60;
-
-const DEFAULT_STATE = {
-  speed: 3,
-  fontSize: 40,
-  opacity: 85,
-  textColor: "#ffffff",
-  bgColor: "#000000",
-  text: "",
-  alwaysOnTop: false,
-  controlsVisible: true,
-};
 
 const state = {
   ...DEFAULT_STATE,
@@ -166,7 +164,7 @@ function bindEvents() {
   });
 
   elements.readText.addEventListener("input", () => {
-    state.text = getReadTextValue();
+    state.text = getReadTextValue(elements.readText);
     saveState();
 
     requestAnimationFrame(() => {
@@ -383,88 +381,6 @@ function updateSpeed(nextSpeed) {
   saveState();
 }
 
-function bindStepInput(inputElement, applyValue, getCurrentValue) {
-  const commit = () => {
-    const parsed = Number(inputElement.value);
-    if (Number.isFinite(parsed)) {
-      applyValue(parsed);
-    } else {
-      inputElement.value = String(getCurrentValue());
-    }
-  };
-
-  inputElement.addEventListener("change", commit);
-  inputElement.addEventListener("blur", commit);
-  inputElement.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter") {
-      return;
-    }
-
-    event.preventDefault();
-    commit();
-    inputElement.blur();
-  });
-}
-
-function bindStepButtonHold(buttonElement, applyStep) {
-  let holdTimeoutId = null;
-  let holdIntervalId = null;
-  let didRepeat = false;
-
-  const clearHold = () => {
-    if (holdTimeoutId !== null) {
-      window.clearTimeout(holdTimeoutId);
-      holdTimeoutId = null;
-    }
-
-    if (holdIntervalId !== null) {
-      window.clearInterval(holdIntervalId);
-      holdIntervalId = null;
-    }
-  };
-
-  const startHold = () => {
-    clearHold();
-    didRepeat = false;
-
-    holdTimeoutId = window.setTimeout(() => {
-      didRepeat = true;
-      applyStep();
-
-      holdIntervalId = window.setInterval(() => {
-        applyStep();
-      }, HOLD_REPEAT_INTERVAL_MS);
-    }, HOLD_START_DELAY_MS);
-  };
-
-  buttonElement.addEventListener("pointerdown", (event) => {
-    if (event.pointerType === "mouse" && event.button !== 0) {
-      return;
-    }
-
-    startHold();
-  });
-
-  buttonElement.addEventListener("pointerup", clearHold);
-  buttonElement.addEventListener("pointercancel", clearHold);
-  buttonElement.addEventListener("pointerleave", clearHold);
-
-  buttonElement.addEventListener("click", (event) => {
-    if (didRepeat) {
-      event.preventDefault();
-      didRepeat = false;
-      return;
-    }
-
-    applyStep();
-  });
-
-  window.addEventListener("blur", () => {
-    clearHold();
-    didRepeat = false;
-  });
-}
-
 function stepSpeed(delta) {
   updateSpeed(state.speed + delta);
 }
@@ -517,33 +433,6 @@ function updateToggleEditorLabel() {
   elements.toggleEditorBtn.textContent = state.controlsVisible
     ? t("actions.hideEditor")
     : t("actions.showEditor");
-}
-
-function normalizeSpeed(value) {
-  if (!Number.isFinite(value)) {
-    return DEFAULT_STATE.speed;
-  }
-
-  const clamped = Math.min(20, Math.max(0.1, value));
-  return Math.round(clamped * 10) / 10;
-}
-
-function normalizeFontSize(value) {
-  if (!Number.isFinite(value)) {
-    return DEFAULT_STATE.fontSize;
-  }
-
-  const clamped = Math.min(120, Math.max(16, value));
-  return Math.round(clamped);
-}
-
-function normalizeOpacity(value) {
-  if (!Number.isFinite(value)) {
-    return DEFAULT_STATE.opacity;
-  }
-
-  const clamped = Math.min(100, Math.max(0, value));
-  return Math.round(clamped);
 }
 
 function onKeyDown(event) {
@@ -648,28 +537,6 @@ function saveState() {
   } catch {}
 }
 
-function hexToRgb(hex) {
-  const normalized = hex.replace("#", "");
-  const value = Number.parseInt(normalized, 16);
-
-  return {
-    r: (value >> 16) & 255,
-    g: (value >> 8) & 255,
-    b: value & 255,
-  };
-}
-
-function isHexColor(value) {
-  return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value);
-}
-
 function t(key) {
   return I18N[key] ?? key;
-}
-
-function getReadTextValue() {
-  return (elements.readText.innerText || "")
-    .replace(/\u00a0/g, " ")
-    .replace(/\r/g, "")
-    .replace(/\n$/, "");
 }

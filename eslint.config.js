@@ -33,7 +33,7 @@ module.exports = [
     files: ["src/renderer/**/*.js"],
     languageOptions: {
       ecmaVersion: "latest",
-      sourceType: "script",
+      sourceType: "module",
       globals: {
         ...globals.browser,
       },
