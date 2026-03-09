@@ -1,13 +1,13 @@
 {
   "name": "teleprompter-desktop",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cross-platform desktop teleprompter MVP",
   "author": "Muhammet",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
-    "icons:generate": "mkdir -p build/icons && icon-gen -i build/icon.svg -o build/icons --ico --icns --favicon --favicon-name icon --favicon-png-sizes 64,128,256,512 --favicon-ico-sizes 16,24,32,48 --ico-name icon --icns-name icon --report",
+    "icons:generate": "mkdir -p build/icons src/assets && icon-gen -i build/icon.svg -o build/icons --ico --icns --favicon --favicon-name icon --favicon-png-sizes 64,128,256,512 --favicon-ico-sizes 16,24,32,48 --ico-name icon --icns-name icon --report && cp build/icons/icon512.png src/assets/icon.png",
     "release": "npm run icons:generate && electron-builder",
     "release:linux": "npm run icons:generate && electron-builder --linux AppImage",
     "release:win": "npm run icons:generate && electron-builder --win zip --config.win.signAndEditExecutable=false",

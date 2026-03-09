@@ -1,17 +1,40 @@
 "use strict";
 
+const fs = require("node:fs");
 const path = require("node:path");
 const { app, BrowserWindow, ipcMain } = require("electron");
 
 let mainWindow = null;
 
+function resolveMainWindowIconPath() {
+  const runtimeIconPath = path.join(__dirname, "assets", "icon.png");
+  if (fs.existsSync(runtimeIconPath)) {
+    return runtimeIconPath;
+  }
+
+  const generatedIconPath = path.join(
+    app.getAppPath(),
+    "build",
+    "icons",
+    "icon512.png",
+  );
+  if (fs.existsSync(generatedIconPath)) {
+    return generatedIconPath;
+  }
+
+  return undefined;
+}
+
 function createMainWindow() {
+  const iconPath = resolveMainWindowIconPath();
+
   mainWindow = new BrowserWindow({
     width: 1100,
     height: 760,
     autoHideMenuBar: true,
     transparent: true,
     backgroundColor: "#00000000",
+    icon: iconPath,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
