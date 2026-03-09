@@ -2,7 +2,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { spawnSync } = require("node:child_process");
+const iconGen = require("icon-gen");
 
 const projectRoot = path.resolve(__dirname, "..");
 const buildIconsDir = path.join(projectRoot, "build", "icons");
@@ -11,46 +11,33 @@ const runtimeAssetsDir = path.join(projectRoot, "src", "assets");
 fs.mkdirSync(buildIconsDir, { recursive: true });
 fs.mkdirSync(runtimeAssetsDir, { recursive: true });
 
-const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-const args = [
-  "-i",
-  path.join("build", "icon.svg"),
-  "-o",
-  path.join("build", "icons"),
-  "--ico",
-  "--icns",
-  "--favicon",
-  "--favicon-name",
-  "icon",
-  "--favicon-png-sizes",
-  "64,128,256,512",
-  "--favicon-ico-sizes",
-  "16,24,32,48",
-  "--ico-name",
-  "icon",
-  "--icns-name",
-  "icon",
-  "--report",
-];
+async function main() {
+  await iconGen(path.join(projectRoot, "build", "icon.svg"), buildIconsDir, {
+    report: true,
+    ico: {
+      name: "icon",
+    },
+    icns: {
+      name: "icon",
+    },
+    favicon: {
+      name: "icon",
+      pngSizes: [64, 128, 256, 512],
+      icoSizes: [16, 24, 32, 48],
+    },
+  });
 
-const result = spawnSync(npmCommand, ["exec", "--", "icon-gen", ...args], {
-  cwd: projectRoot,
-  stdio: "inherit",
+  const generatedRuntimeIcon = path.join(buildIconsDir, "icon512.png");
+  const bundledRuntimeIcon = path.join(runtimeAssetsDir, "icon.png");
+
+  if (!fs.existsSync(generatedRuntimeIcon)) {
+    throw new Error(`Missing generated icon: ${generatedRuntimeIcon}`);
+  }
+
+  fs.copyFileSync(generatedRuntimeIcon, bundledRuntimeIcon);
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
 });
-
-if (result.error) {
-  throw result.error;
-}
-
-if (result.status !== 0) {
-  process.exit(result.status ?? 1);
-}
-
-const generatedRuntimeIcon = path.join(buildIconsDir, "icon512.png");
-const bundledRuntimeIcon = path.join(runtimeAssetsDir, "icon.png");
-
-if (!fs.existsSync(generatedRuntimeIcon)) {
-  throw new Error(`Missing generated icon: ${generatedRuntimeIcon}`);
-}
-
-fs.copyFileSync(generatedRuntimeIcon, bundledRuntimeIcon);
