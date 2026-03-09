@@ -7,11 +7,12 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
-    "release": "electron-builder",
-    "release:linux": "electron-builder --linux AppImage",
-    "release:win": "electron-builder --win zip --config.win.signAndEditExecutable=false",
-    "release:mac": "electron-builder --mac zip",
-    "release:all": "electron-builder -mwl",
+    "icons:generate": "mkdir -p build/icons && icon-gen -i build/icon.svg -o build/icons --ico --icns --favicon --favicon-name icon --favicon-png-sizes 64,128,256,512 --favicon-ico-sizes 16,24,32,48 --ico-name icon --icns-name icon --report",
+    "release": "npm run icons:generate && electron-builder",
+    "release:linux": "npm run icons:generate && electron-builder --linux AppImage",
+    "release:win": "npm run icons:generate && electron-builder --win zip --config.win.signAndEditExecutable=false",
+    "release:mac": "npm run icons:generate && electron-builder --mac zip",
+    "release:all": "npm run icons:generate && electron-builder -mwl",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
@@ -21,12 +22,14 @@
     "appId": "com.teleprompter.desktop",
     "productName": "Teleprompter Desktop",
     "asar": true,
+    "afterSign": "scripts/notarize.js",
     "files": [
       "src/**/*",
       "package.json"
     ],
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "build"
     },
     "linux": {
       "target": [
@@ -37,10 +40,15 @@
           ]
         }
       ],
-      "category": "Utility"
+      "category": "Utility",
+      "icon": "build/icons"
     },
     "win": {
       "signAndEditExecutable": false,
+      "signingHashAlgorithms": [
+        "sha256"
+      ],
+      "icon": "build/icons/icon.ico",
       "target": [
         {
           "target": "zip",
@@ -51,6 +59,11 @@
       ]
     },
     "mac": {
+      "icon": "build/icons/icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
       "target": [
         {
           "target": "zip",
@@ -63,11 +76,13 @@
     }
   },
   "devDependencies": {
+    "@electron/notarize": "^3.1.1",
     "@eslint/js": "^9.22.0",
     "electron": "^35.0.0",
     "electron-builder": "^24.13.3",
     "eslint": "^9.22.0",
     "globals": "^15.15.0",
+    "icon-gen": "^5.0.0",
     "prettier": "^3.5.3"
   }
 }
