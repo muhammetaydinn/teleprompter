@@ -1,7 +1,7 @@
 {
   "name": "teleprompter-desktop",
   "productName": "Teleprompter Desktop",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Cross-platform desktop teleprompter MVP",
   "author": "Muhammet",
   "main": "src/main.js",

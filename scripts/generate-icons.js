@@ -11,7 +11,7 @@ const runtimeAssetsDir = path.join(projectRoot, "src", "assets");
 fs.mkdirSync(buildIconsDir, { recursive: true });
 fs.mkdirSync(runtimeAssetsDir, { recursive: true });
 
-const iconGenBin = process.platform === "win32" ? "icon-gen.cmd" : "icon-gen";
+const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const args = [
   "-i",
   path.join("build", "icon.svg"),
@@ -33,10 +33,14 @@ const args = [
   "--report",
 ];
 
-const result = spawnSync(iconGenBin, args, {
+const result = spawnSync(npmCommand, ["exec", "--", "icon-gen", ...args], {
   cwd: projectRoot,
   stdio: "inherit",
 });
+
+if (result.error) {
+  throw result.error;
+}
 
 if (result.status !== 0) {
   process.exit(result.status ?? 1);
