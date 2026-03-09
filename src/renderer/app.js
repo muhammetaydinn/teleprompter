@@ -15,6 +15,7 @@ import {
   normalizeOpacity,
   normalizeSpeed,
 } from "./modules/helpers.js";
+import { createScrollEngine } from "./modules/scrolling.js";
 
 const I18N = window.__APP_I18N__?.[LOCALE] ?? {};
 
@@ -47,11 +48,11 @@ const elements = {
   ),
 };
 
-let playing = false;
-let scrollPos = 0;
-let containerHeight = 0;
-let animFrame = null;
-let lastTs = null;
+const scrollEngine = createScrollEngine({
+  readWrapElement: elements.readWrap,
+  readTextElement: elements.readText,
+  getSpeed: () => state.speed,
+});
 
 init().catch(() => {
   applyI18n();
@@ -188,7 +189,7 @@ function bindEvents() {
 
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("resize", onResize);
-  window.addEventListener("beforeunload", stopAnimation);
+  window.addEventListener("beforeunload", cleanupScrollEngine);
 }
 
 function applyStateToUi() {
@@ -260,108 +261,46 @@ function syncReadText() {
 }
 
 function togglePlayPause() {
-  playing = !playing;
+  scrollEngine.toggle(() => {
+    syncReadEditability();
+    updatePlayPauseLabel();
+  });
   syncReadEditability();
   updatePlayPauseLabel();
-
-  if (playing) {
-    startAnimation();
-  } else {
-    stopAnimation();
-  }
 }
 
 function resetRead() {
-  stopAnimation();
-  playing = false;
+  scrollEngine.reset();
   syncReadEditability();
-  scrollPos = 0;
   refreshReadViewport();
   updatePlayPauseLabel();
 }
 
-function startAnimation() {
-  if (animFrame) {
-    cancelAnimationFrame(animFrame);
-  }
-
-  refreshReadViewport();
-  lastTs = null;
-
-  const tick = (timestamp) => {
-    if (!playing) {
-      return;
-    }
-
-    if (!lastTs) {
-      lastTs = timestamp;
-    }
-
-    const delta = Math.min(timestamp - lastTs, 100);
-    lastTs = timestamp;
-
-    scrollPos += ((state.speed * 30) / 1000) * delta;
-    const offset = containerHeight - scrollPos;
-    setReadOffset(offset);
-
-    if (offset < -(elements.readText.offsetHeight + 40)) {
-      playing = false;
-      updatePlayPauseLabel();
-      return;
-    }
-
-    animFrame = requestAnimationFrame(tick);
-  };
-
-  animFrame = requestAnimationFrame(tick);
-}
-
-function stopAnimation() {
-  if (animFrame) {
-    cancelAnimationFrame(animFrame);
-    animFrame = null;
-  }
-}
-
-function setReadOffset(offset) {
-  elements.readText.style.transform = `translateY(${offset}px)`;
-}
-
 function refreshReadViewport() {
-  containerHeight = elements.readWrap.clientHeight;
-  setReadOffset(containerHeight - scrollPos);
+  scrollEngine.refreshViewport();
 }
 
 function onReadWrapWheel(event) {
-  if (playing) {
+  if (scrollEngine.isPlaying()) {
     return;
   }
 
-  if (containerHeight <= 0) {
-    refreshReadViewport();
-  }
-
   event.preventDefault();
-  scrollPos = clampScrollPos(scrollPos + event.deltaY);
-  setReadOffset(containerHeight - scrollPos);
+  scrollEngine.handleWheel(event.deltaY);
 }
 
-function clampScrollPos(nextValue) {
-  const maxScrollPos = Math.max(
-    0,
-    containerHeight + elements.readText.offsetHeight + 40,
-  );
-  return Math.min(maxScrollPos, Math.max(0, nextValue));
+function cleanupScrollEngine() {
+  scrollEngine.cleanup();
 }
 
 function updatePlayPauseLabel() {
-  elements.playPauseBtn.textContent = playing
+  elements.playPauseBtn.textContent = scrollEngine.isPlaying()
     ? t("controls.pause")
     : t("controls.play");
 }
 
 function syncReadEditability() {
-  const editable = !playing;
+  const editable = !scrollEngine.isPlaying();
   elements.readText.setAttribute(
     "contenteditable",
     editable ? "true" : "false",
