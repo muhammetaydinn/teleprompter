@@ -6,6 +6,8 @@ const { app, BrowserWindow, ipcMain } = require("electron");
 
 let mainWindow = null;
 
+app.setName("Teleprompter Desktop");
+
 function resolveMainWindowIconPath() {
   const runtimeIconPath = path.join(__dirname, "assets", "icon.png");
   if (fs.existsSync(runtimeIconPath)) {

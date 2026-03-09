@@ -53,6 +53,15 @@ npm run release:all
 
 Build outputs are written to `release/`.
 
+Automated release with GitHub Actions:
+
+```bash
+git tag v0.1.2
+git push origin v0.1.2
+```
+
+This triggers `.github/workflows/release.yml` and uploads build artifacts to the GitHub Release automatically.
+
 ## Linux Installation (AppImage)
 
 ```bash
