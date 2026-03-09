@@ -15,9 +15,14 @@ import {
   normalizeOpacity,
   normalizeSpeed,
 } from "./modules/helpers.js";
+import { applyI18nToDocument, createTranslator } from "./modules/i18n.js";
 import { createScrollEngine } from "./modules/scrolling.js";
+import {
+  adjustWindowHeight,
+  setAlwaysOnTop,
+} from "./modules/window-controls.js";
 
-const I18N = window.__APP_I18N__?.[LOCALE] ?? {};
+const t = createTranslator(LOCALE);
 
 const state = {
   ...DEFAULT_STATE,
@@ -55,7 +60,7 @@ const scrollEngine = createScrollEngine({
 });
 
 init().catch(() => {
-  applyI18n();
+  applyI18nToDocument(t);
   applyStateToUi();
   applyVisualState();
   syncEditorVisibility();
@@ -64,7 +69,7 @@ init().catch(() => {
 });
 
 async function init() {
-  applyI18n();
+  applyI18nToDocument(t);
   bindEvents();
   applyStateToUi();
   applyVisualState();
@@ -72,44 +77,12 @@ async function init() {
   syncEditorVisibility();
   syncReadEditability();
 
-  if (window.windowControls?.setAlwaysOnTop) {
-    try {
-      const applied = await window.windowControls.setAlwaysOnTop(
-        state.alwaysOnTop,
-      );
-      state.alwaysOnTop = Boolean(applied);
-      syncAlwaysOnTopInputs();
-      saveState();
-    } catch {}
-  }
+  state.alwaysOnTop = await setAlwaysOnTop(state.alwaysOnTop);
+  syncAlwaysOnTopInputs();
+  saveState();
 
   requestAnimationFrame(() => {
     refreshReadViewport();
-  });
-}
-
-function applyI18n() {
-  document.title = t("meta.title");
-
-  document.querySelectorAll("[data-i18n]").forEach((node) => {
-    const key = node.getAttribute("data-i18n");
-    if (!key) return;
-    node.textContent = t(key);
-  });
-
-  document.querySelectorAll("[data-i18n-attr]").forEach((node) => {
-    const raw = node.getAttribute("data-i18n-attr");
-    if (!raw) return;
-
-    raw
-      .split(";")
-      .map((segment) => segment.trim())
-      .filter(Boolean)
-      .forEach((segment) => {
-        const [attr, key] = segment.split(":").map((part) => part.trim());
-        if (!attr || !key) return;
-        node.setAttribute(attr, t(key));
-      });
   });
 }
 
@@ -354,18 +327,12 @@ function syncEditorVisibility(targetReadHeight) {
 }
 
 async function adjustWindowHeightByReadDelta(readHeightDelta) {
-  if (!window.windowControls?.adjustHeight) {
-    return;
-  }
-
   const windowHeightDelta = -Math.round(readHeightDelta);
   if (windowHeightDelta === 0) {
     return;
   }
 
-  try {
-    await window.windowControls.adjustHeight(windowHeightDelta);
-  } catch {}
+  await adjustWindowHeight(windowHeightDelta);
 }
 
 function updateToggleEditorLabel() {
@@ -415,16 +382,7 @@ function onResize() {
 }
 
 async function updateAlwaysOnTop(nextValue) {
-  state.alwaysOnTop = Boolean(nextValue);
-
-  if (window.windowControls?.setAlwaysOnTop) {
-    try {
-      const applied = await window.windowControls.setAlwaysOnTop(
-        state.alwaysOnTop,
-      );
-      state.alwaysOnTop = Boolean(applied);
-    } catch {}
-  }
+  state.alwaysOnTop = await setAlwaysOnTop(nextValue);
 
   syncAlwaysOnTopInputs();
   saveState();
@@ -474,8 +432,4 @@ function saveState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {}
-}
-
-function t(key) {
-  return I18N[key] ?? key;
 }
